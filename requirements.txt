@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+fpdf2
+python-dotenv
+pydantic
+email-validator
+requests

@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Planner | Yacht 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:      #3A3A1E;
+            --primary-dark: #2A2A12;
+            --bg:           #4A4A28;
+            --accent:       #C8A84B;
+            --accent-hover: #B8943A;
+            --text-light:   #F5F0E8;
+            --text-muted:   #C8BFA0;
+            --border:       rgba(200, 168, 75, 0.25);
+            --input-bg:     rgba(255,255,255,0.07);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── CLOSE BUTTON ── */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+            background: none;
+            border: none;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: var(--accent); }
+
+        /* ── LAYOUT ── */
+        .wizard-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Step 1 is full-width centered, steps 2-5 have sidebar */
+        .wizard-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .wizard-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 36px 40px 20px;
+        }
+
+        .wizard-sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: var(--primary-dark);
+            border-left: 1px solid var(--border);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .summary-item .icon { font-size: 0.9rem; }
+
+        .summary-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 4px 0;
+        }
+
+        .summary-price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 0.65rem;
+            color: rgba(200,191,160,0.4);
+            text-align: center;
+        }
+
+        /* ── BOTTOM NAV ── */
+        .wizard-footer {
+            background: var(--primary-dark);
+            border-top: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .step-counter {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            min-width: 60px;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-prev {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-prev:hover { color: var(--text-light); border-color: var(--text-muted); }
+
+        .btn-next {
+            background: var(--accent);
+            color: var(--primary-dark);
+        }
+        .btn-next:hover { background: var(--accent-hover); }
+
+        .btn-submit {
+            background: var(--accent);
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .btn-submit:hover { background: var(--accent-hover); }
+
+        /* ── STEP PANELS ── */
+        .step { display: none; }
+        .step.active { display: flex; flex-direction: column; }
+
+        /* ── STEP 1 SPECIFIC (centered, no sidebar) ── */
+        #step1-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 50px 20px;
+            max-width: 540px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .step1-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 3px;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .step1-intro {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        /* ── HEADINGS ── */
+        .step-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .step-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .form-group { margin-bottom: 16px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        input::placeholder, textarea::placeholder { color: var(--text-muted); }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.1);
+        }
+
+        select option { background: var(--primary-dark); }
+
+        textarea {
+            resize: none;
+            height: 90px;
+            line-height: 1.6;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 20px 0 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── LOCATION CARDS ── */
+        .location-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .location-card {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .location-card:hover { border-color: var(--accent); background: rgba(200,168,75,0.08); }
+        .location-card.selected { border-color: var(--accent); background: rgba(200,168,75,0.15); }
+
+        .location-card-img {
+            width: 100%;
+            height: 180px;
+            background: rgba(200,168,75,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.4);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .location-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .location-card-body {
+            padding: 10px 14px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .location-card-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+            letter-spacing: 1px;
+        }
+
+        .location-card-sub {
+            font-size: 0.67rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .location-card-price {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .location-card-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .location-card.selected .location-card-check {
+            background: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
+        }
+
+        /* ── CATERING CARDS ── */
+        .catering-section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .catering-section-label:first-child { margin-top: 0; }
+
+        .catering-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .catering-card {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: var(--input-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .catering-card:hover { border-color: var(--accent); background: rgba(200,168,75,0.06); }
+        .catering-card.selected { border-color: var(--accent); background: rgba(200,168,75,0.12); }
+
+        .catering-img-placeholder {
+            width: 100%;
+            height: 180px;
+            background: rgba(200,168,75,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.58rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(200,168,75,0.35);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* ── IMAGE SLIDER ── */
+        .img-slider {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            align-items: stretch;
+            justify-items: stretch;
+        }
+        .location-card-img.img-slider        { height: 180px; grid-template-rows: 180px; }
+        .catering-img-placeholder.img-slider { height: 180px; padding: 0; grid-template-rows: 180px; }
+        .ent-img.img-slider                  { height: 140px; grid-template-rows: 140px; }
+        .img-slider .slider-img {
+            grid-row: 1; grid-column: 1;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.9s ease;
+            display: block;
+        }
+        .img-slider .slider-img.active { opacity: 1; }
+        .slider-dots {
+            position: absolute;
+            bottom: 5px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 5px;
+            z-index: 2; pointer-events: none;
+            grid-row: 1; grid-column: 1;
+        }
+        .dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            transition: background 0.3s;
+        }
+        .dot.active { background: rgba(255,255,255,0.9); }
+        .ent-img {
+            width: 100%; height: 140px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* ── SLIDER PIJLTJES ── */
+        .slider-arrow {
+            position: absolute;
+            grid-row: 1; grid-column: 1;
+            top: 50%; transform: translateY(-50%);
+            z-index: 3;
+            background: rgba(0,0,0,0.38);
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            width: 26px; height: 36px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        .slider-arrow.prev { left: 0; border-radius: 0 2px 2px 0; }
+        .slider-arrow.next { right: 0; border-radius: 2px 0 0 2px; }
+        .img-slider:hover .slider-arrow { opacity: 1; }
+        .slider-arrow:hover { background: rgba(0,0,0,0.6); }
+
+        .catering-body {
+            padding: 8px 10px 28px;
+            flex: 1;
+        }
+
+        .catering-name-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .catering-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+
+        .catering-price {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .catering-desc {
+            font-size: 0.67rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .catering-add {
+            position: absolute;
+            bottom: 7px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            transition: all 0.2s;
+        }
+
+        .catering-card.selected .catering-add {
+            background: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ── DRINK ARRANGEMENT ── */
+        .drink-arrangement-card {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--input-bg);
+            padding: 14px 16px;
+            margin-bottom: 4px;
+        }
+
+        .drink-arrangement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .drink-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .drink-subtitle {
+            font-size: 0.67rem;
+            color: var(--text-muted);
+        }
+
+        .drink-hours {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .drink-hour-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text-muted);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            min-width: 52px;
+        }
+
+        .drink-hour-btn .dh-hours { font-size: 0.78rem; color: var(--text-light); }
+        .drink-hour-btn .dh-price { font-size: 0.62rem; color: var(--text-muted); }
+
+        .drink-hour-btn:hover { border-color: var(--accent); color: var(--text-light); }
+
+        .drink-hour-btn.selected {
+            background: rgba(200,168,75,0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .drink-hour-btn.selected .dh-hours,
+        .drink-hour-btn.selected .dh-price { color: var(--accent); }
+
+        /* ── ENTERTAINMENT CARDS ── */
+        .ent-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .ent-card {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0 0 12px 0;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ent-card:hover { border-color: var(--accent); background: rgba(200,168,75,0.06); }
+        .ent-card.selected { border-color: var(--accent); background: rgba(200,168,75,0.12); }
+
+        .ent-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-light);
+            padding: 10px 12px 0;
+        }
+
+        .ent-desc {
+            font-size: 0.67rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            padding: 0 12px;
+        }
+
+        .ent-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 0 12px;
+        }
+
+        .ent-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: transparent;
+            background: var(--bg);
+            transition: all 0.2s;
+        }
+
+        .ent-card.selected .ent-check {
+            background: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
+        }
+
+
+        /* ── SUCCESS ── */
+        .success-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .success-page h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .success-page p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 380px;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="wizard-wrapper">
+
+    <!-- CLOSE BUTTON -->
+    <button class="close-btn" onclick="closeWizard()">&#x2715;</button>
+
+    <!-- STEP 1: Intro + basis -->
+    <div class="step active" id="step1" style="flex:1; overflow:hidden; flex-direction:column;">
+        <div id="step1-wrapper">
+            <div class="step1-title">Yacht 5 Event Planner</div>
+            <p class="step1-intro">
+                Wat gaaf dat jullie eraan denken om een event bij ons te organiseren! Met onze handige eventplanner creëer je binnen enkele minuten een eerste schets van jouw event. Vraag nu vrijblijvend naar de mogelijkheden en wij nemen z.s.m. contact met jou op.<br><br>
+                Heb je nog vragen? Neem gerust contact met ons op via <strong style="color:var(--text-light);">+31 475 202 412</strong>.
+            </p>
+
+            <div class="form-group">
+                <label>Soort evenement</label>
+                <select id="category">
+                    <option value="Zakelijk">Zakelijk</option>
+                    <option value="Particulier">Particulier</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="margin:0">
+                    <label>Aantal gasten <span style="color:var(--accent);">*</span></label>
+                    <input type="number" id="guests" placeholder="Bijv. 20" min="1">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Datum <span style="color:var(--accent);">*</span></label>
+                    <input type="date" id="date">
+                </div>
+            </div>
+            <div id="step1-error" style="color:#e07070; font-size:0.78rem; margin-top:8px; display:none;">Vul een datum en aantal gasten in om verder te gaan.</div>
+        </div>
+
+        <div class="wizard-footer">
+            <span class="step-counter"></span>
+            <div class="footer-right">
+                <button class="btn btn-next" onclick="goTo(2)">Bekijk de mogelijkheden ›</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEPS 2–5 + SUCCESS: two-column layout -->
+    <div class="step" id="step2" style="flex:1; overflow:hidden;">
+        <div class="wizard-body">
+            <div class="wizard-main">
+                <div class="step-title">Welke ruimte/ruimtes heeft uw voorkeur?</div>
+                <p class="step-subtitle">Selecteer één of meerdere ruimtes voor uw evenement.</p>
+                <div class="location-cards" id="locationCards">
+                    <div class="location-card" onclick="selectLocation(this, 'Bovenruimte tot 70 pax', 800)">
+                        <div class="location-card-img img-slider">
+                            <img src="/images/Foto_bovenruimte01.jpg" class="slider-img active"><img src="/images/Foto_bovenruimte02.jpg" class="slider-img"><img src="/images/Foto_bovenruimte03.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="location-card-body">
+                            <div>
+                                <div class="location-card-name">Bovenruimte tot 70 pax</div>
+                                <div class="location-card-price">€800</div>
+                            </div>
+                            <div class="location-card-check">✓</div>
+                        </div>
+                    </div>
+                    <div class="location-card" onclick="selectLocation(this, 'Bovenruimte 70+ pax', 1000)">
+                        <div class="location-card-img img-slider">
+                            <img src="/images/Foto_bovenruimte02.jpg" class="slider-img active"><img src="/images/Foto_bovenruimte03.jpg" class="slider-img"><img src="/images/Foto_bovenruimte01.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="location-card-body">
+                            <div>
+                                <div class="location-card-name">Bovenruimte 70+ pax</div>
+                                <div class="location-card-price">€1.000</div>
+                            </div>
+                            <div class="location-card-check">✓</div>
+                        </div>
+                    </div>
+                    <div class="location-card" onclick="selectLocation(this, 'Benedenverdieping + hele terras', 2500)">
+                        <div class="location-card-img img-slider">
+                            <img src="/images/Beneden_bar01.jpg" class="slider-img active"><img src="/images/Beneden_bar02.jpg" class="slider-img"><img src="/images/Beneden02.jpg" class="slider-img"><img src="/images/Beneden_binne.jpg" class="slider-img"><img src="/images/Terras_beneden.jpg" class="slider-img"><img src="/images/Terras_beneden02.jpg" class="slider-img"><img src="/images/Terras_beneden03.jpg" class="slider-img"><img src="/images/Terras_beneden04.jpg" class="slider-img"><img src="/images/600_lounge.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="location-card-body">
+                            <div>
+                                <div class="location-card-name">Benedenverdieping + hele terras</div>
+                                <div class="location-card-price">€2.500</div>
+                            </div>
+                            <div class="location-card-check">✓</div>
+                        </div>
+                    </div>
+                    <div class="location-card" onclick="selectLocation(this, 'Het hele pand', 3000)">
+                        <div class="location-card-img img-slider">
+                            <img src="/images/Hele_pand01.jpg" class="slider-img active"><img src="/images/Hele_pand02.jpg" class="slider-img"><img src="/images/Hele_pand03.jpg" class="slider-img"><img src="/images/Hele_pand04.jpg" class="slider-img"><img src="/images/helepand03.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="location-card-body">
+                            <div>
+                                <div class="location-card-name">Het hele pand</div>
+                                <div class="location-card-price">€3.000</div>
+                            </div>
+                            <div class="location-card-check">✓</div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="location" value="">
+            </div>
+            <div class="wizard-sidebar" id="sidebar2">
+                <!-- filled by JS -->
+            </div>
+        </div>
+        <div class="wizard-footer">
+            <span class="step-counter">Stap 2 / 4</span>
+            <div class="footer-right">
+                <button class="btn btn-prev" onclick="goTo(1)">‹ Terug</button>
+                <button class="btn btn-next" onclick="goTo(3)">Volgende ›</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: Mogelijkheden -->
+    <div class="step" id="step3" style="flex:1; overflow:hidden;">
+        <div class="wizard-body">
+            <div class="wizard-main">
+                <div class="step-title">Mogelijkheden</div>
+                <p class="step-subtitle">Selecteer wat u nodig heeft — prijzen zijn per persoon, tenzij anders aangegeven.</p>
+
+                <!-- FOOD -->
+                <div class="catering-section-label">Food</div>
+                <div class="catering-grid">
+                    <div class="catering-card" onclick="toggleCatering(this, 'Sandwich & Soup')">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Sandwich &amp; Soup</span>
+                                <span class="catering-price">€14,95 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Luxe belegde broodjes en soep</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Lunch 2-gangen')">
+                        <div class="catering-img-placeholder img-slider">
+                            <img src="/images/Eten02.jpg" class="slider-img active"><img src="/images/Eten03.jpg" class="slider-img"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Lunch / Diner 2-gangen</span>
+                                <span class="catering-price">€37,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Keuzemenu vis / vlees / vega</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Lunch 3-gangen')">
+                        <div class="catering-img-placeholder img-slider">
+                            <img src="/images/Eten03.jpg" class="slider-img active"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img"><img src="/images/Eten02.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Lunch / Diner 3-gangen</span>
+                                <span class="catering-price">€45,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Keuzemenu vis / vlees / vega</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Borrelbites')">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Borrelbites</span>
+                                <span class="catering-price">€5,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Mixed snacks uit onze kaart</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Fingerfoods')">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Fingerfoods</span>
+                                <span class="catering-price">€10,95 p.p.</span>
+                            </div>
+                            <div class="catering-desc">4 rondes kleine hapjes (vega / vis / vlees)</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Walking Dinner 4-gangen')">
+                        <div class="catering-img-placeholder img-slider">
+                            <img src="/images/Eten01.jpg" class="slider-img active"><img src="/images/Eten03.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten02.jpg" class="slider-img"><img src="/images/Eten04.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Walking Dinner 4-gangen</span>
+                                <span class="catering-price">€39,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Menu in overleg</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Walking Dinner 5-gangen')">
+                        <div class="catering-img-placeholder img-slider">
+                            <img src="/images/Eten02.jpg" class="slider-img active"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten03.jpg" class="slider-img">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Walking Dinner 5-gangen</span>
+                                <span class="catering-price">€47,00 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Menu in overleg</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Barbecue')">
+                        <div class="catering-img-placeholder img-slider">
+                            <img src="/images/BBQ.jpg" class="slider-img active"><img src="/images/BBQ01.jpg" class="slider-img"><img src="/images/BBQ02.jpg" class="slider-img"><img src="/images/BBQ03.jpg" class="slider-img" style="object-fit:contain;background:#5d5c38;"><img src="/images/BBQ04.jpg" class="slider-img" style="object-fit:contain;background:#5d5c38;">
+                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Yacht 5 Barbecue</span>
+                                <span class="catering-price">€29,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">4 stukken vlees, saladebuffet, brood</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Easy Streetfood')">
+                        <div class="catering-img-placeholder"><img src="/images/Eten03_streetfood.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Easy Streetfood</span>
+                                <span class="catering-price" style="color:var(--text-muted);">Op aanvraag</span>
+                            </div>
+                            <div class="catering-desc">Empanada's, pulled chicken, burgers &amp; meer</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                </div>
+
+                <!-- DRINKS -->
+                <div class="catering-section-label">Dranken</div>
+                <div class="catering-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:10px;">
+                    <div class="catering-card" onclick="toggleCatering(this, 'Welkomst bubbels')">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Welkomst bubbels</span>
+                                <span class="catering-price">€6,95 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Bubbels of alcoholvrij alternatief bij ontvangst</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" id="overigeDrankenCard" onclick="toggleOverigeDranken(this)">
+                        <div class="catering-img-placeholder">
+                            <img src="/images/Drinken04_nacalc.jpg" style="width:100%;height:100%;object-fit:contain;background:#5d5c38;">
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Na calculatie van dranken</span>
+                                <span class="catering-price" style="color:var(--text-muted);">Nacalculatie</span>
+                            </div>
+                            <div class="catering-desc">Wordt achteraf op verbruik berekend</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div id="overigeDrankenMsg" style="display:none; font-size:0.72rem; color:var(--text-muted); padding:6px 4px; grid-column:1/-1;">
+                        ⚠ Na calculatie van dranken is niet beschikbaar voor zakelijke events met meer dan 30 personen.
+                    </div>
+                </div>
+
+                <div class="drink-arrangement-card">
+                    <div class="drink-arrangement-header">
+                        <span class="drink-title">Drankarrangement</span>
+                        <span class="drink-subtitle">Bier, wijn &amp; fris — kies een duur</span>
+                    </div>
+                    <div class="drink-hours" id="drinkHours">
+                        <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '2u')">
+                            <span class="dh-hours">2 uur</span>
+                            <span class="dh-price">€27,25 p.p.</span>
+                        </button>
+                        <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '3u')">
+                            <span class="dh-hours">3 uur</span>
+                            <span class="dh-price">€32,25 p.p.</span>
+                        </button>
+                        <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '4u')">
+                            <span class="dh-hours">4 uur</span>
+                            <span class="dh-price">€37,25 p.p.</span>
+                        </button>
+                        <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '5u')">
+                            <span class="dh-hours">5 uur</span>
+                            <span class="dh-price">€42,25 p.p.</span>
+                        </button>
+                        <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '6u')">
+                            <span class="dh-hours">6 uur</span>
+                            <span class="dh-price">€47,25 p.p.</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ENTERTAINMENT -->
+                <div class="catering-section-label">Entertainment &amp; invulling</div>
+                <div class="ent-grid">
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'Bierproeverij')">
+                        <div class="ent-img"></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">Bierproeverij</div>
+                        <div class="ent-desc">Proef een selectie ambachtelijke bieren</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'Cocktailworkshop')">
+                        <div class="ent-img"></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">Cocktailworkshop</div>
+                        <div class="ent-desc">Maak je eigen cocktail onder begeleiding</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'Spreker')">
+                        <div class="ent-img"></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">Spreker</div>
+                        <div class="ent-desc">Inspirerende of inhoudelijke gastspreker</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'Live muziek')">
+                        <div class="ent-img"></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">Live muziek</div>
+                        <div class="ent-desc">Zangeres of akoestische band</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'DJ')">
+                        <div class="ent-img img-slider"><img src="/images/DJ01.jpg" class="slider-img active"><img src="/images/DJ02.jpg" class="slider-img"><div class="slider-dots"><span class="dot active"></span><span class="dot"></span></div></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">DJ</div>
+                        <div class="ent-desc">DJ op maat voor uw event</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                    <div class="ent-card" onclick="toggleEntertainment(this, 'Unieke acts')">
+                        <div class="ent-img"></div>
+                        <div class="ent-check">✓</div>
+                        <div class="ent-label">Unieke acts</div>
+                        <div class="ent-desc">Buikdans, drag queen bingo &amp; meer</div>
+                        <div class="ent-badge">Op aanvraag</div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="catering_value" value="">
+            </div>
+            <div class="wizard-sidebar" id="sidebar3"></div>
+        </div>
+        <div class="wizard-footer">
+            <span class="step-counter">Stap 3 / 4</span>
+            <div class="footer-right">
+                <button class="btn btn-prev" onclick="goTo(2)">‹ Terug</button>
+                <button class="btn btn-next" onclick="goTo(4)">Volgende ›</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 4: Contactgegevens + Aanvullende informatie -->
+    <div class="step" id="step4" style="flex:1; overflow:hidden;">
+        <div class="wizard-body">
+            <div class="wizard-main">
+                <div class="step-title">Contactgegevens</div>
+
+                <div class="section-label">Contactgegevens</div>
+
+                <div class="form-group" id="companyGroup">
+                    <input type="text" id="company" placeholder="Bedrijfsnaam">
+                </div>
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="first_name" placeholder="Voornaam">
+                    </div>
+                    <div>
+                        <input type="text" id="last_name" placeholder="Achternaam">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="contact_email" placeholder="E-mailadres *">
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="contact_phone" placeholder="Telefoonnummer *">
+                </div>
+
+                <div class="section-label">Adresgegevens</div>
+
+                <div class="form-group">
+                    <input type="text" id="address" placeholder="Straatnaam + huisnummer">
+                </div>
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="zipcode" placeholder="Postcode">
+                    </div>
+                    <div>
+                        <input type="text" id="city" placeholder="Plaats">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <select id="country">
+                        <option value="NL">Nederland</option>
+                        <option value="BE">België</option>
+                        <option value="DE">Duitsland</option>
+                    </select>
+                </div>
+
+                <div class="section-label">Aanvullende informatie</div>
+
+                <div class="form-group">
+                    <label>Geef een korte beschrijving van het event <span style="color:var(--accent);">*</span></label>
+                    <textarea id="description" placeholder="Beschrijving..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Wat is de begin- en eindtijd van het event? <span style="color:var(--accent);">*</span></label>
+                    <textarea id="timing" placeholder="Bijv. 14:00 – 23:00"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Vul hier het programma in (optioneel)</label>
+                    <textarea id="program" placeholder="Programma..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Heeft u nog vragen aan ons? (optioneel)</label>
+                    <textarea id="questions" placeholder="Uw vragen..."></textarea>
+                </div>
+
+            </div>
+            <div class="wizard-sidebar" id="sidebar4"></div>
+        </div>
+        <div class="wizard-footer">
+            <span class="step-counter">Stap 4 / 4</span>
+            <div class="footer-right">
+                <button class="btn btn-prev" onclick="goTo(3)">‹ Terug</button>
+                <button class="btn btn-submit" onclick="submitForm()">Offerte aanvragen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step" id="stepSuccess" style="flex:1; overflow:hidden;">
+        <div class="success-page">
+            <div class="success-icon">✓</div>
+            <h2>Bedankt!</h2>
+            <p>Uw aanvraag is verwerkt. U ontvangt zo spoedig mogelijk de offerte per e-mail.<br><br>
+            Heeft u vragen? Bel ons op <strong style="color:var(--text-light);">+31 475 202 412</strong>.</p>
+        </div>
+    </div>
+
+</div><!-- /wizard-wrapper -->
+
+<script>
+    let currentStep = 1;
+    const selectedCatering  = new Set();  // food + welkomst bubbels + entertainment
+    const selectedLocations = new Set();
+    let   selectedDrinkKey  = null;       // drankarrangement (single-select)
+
+    // ── PRIJZENLIJST ──────────────────────────────────────────────
+    const PRICING = {
+        'Sandwich & Soup':        { price: 14.95 },
+        'Lunch 2-gangen':         { price: 37.50 },
+        'Lunch 3-gangen':         { price: 45.50 },
+        'Borrelbites':            { price:  5.50 },
+        'Fingerfoods':            { price: 10.95 },
+        'Walking Dinner 4-gangen':{ price: 39.50 },
+        'Walking Dinner 5-gangen':{ price: 47.00 },
+        'Barbecue':               { price: 29.50 },
+        'Easy Streetfood':        { price: null  },
+        'Welkomst bubbels':       { price:  6.95 },
+        'Na calculatie van dranken':        { price: null, nacalc: true },
+        'Drankarrangement 2u':    { price: 27.25 },
+        'Drankarrangement 3u':    { price: 32.25 },
+        'Drankarrangement 4u':    { price: 37.25 },
+        'Drankarrangement 5u':    { price: 42.25 },
+        'Drankarrangement 6u':    { price: 47.25 },
+        'Bierproeverij':          { price: null  },
+        'Cocktailworkshop':       { price: null  },
+        'Spreker':                { price: null  },
+        'Live muziek':            { price: null  },
+        'DJ':                     { price: null  },
+        'Unieke acts':            { price: null  },
+    };
+
+    const DRINK_HOURS = {
+        '2u': { key: 'Drankarrangement 2u', price: 27.25, label: '2 uur' },
+        '3u': { key: 'Drankarrangement 3u', price: 32.25, label: '3 uur' },
+        '4u': { key: 'Drankarrangement 4u', price: 37.25, label: '4 uur' },
+        '5u': { key: 'Drankarrangement 5u', price: 42.25, label: '5 uur' },
+        '6u': { key: 'Drankarrangement 6u', price: 47.25, label: '6 uur' },
+    };
+
+    // ── NAVIGATIE ─────────────────────────────────────────────────
+    function goTo(step) {
+        if (currentStep === 1 && step > 1) {
+            const guests = document.getElementById('guests').value;
+            const date   = document.getElementById('date').value;
+            const err    = document.getElementById('step1-error');
+            if (!guests || parseInt(guests) < 1 || !date) {
+                err.style.display = 'block';
+                return;
+            }
+            err.style.display = 'none';
+        }
+        document.getElementById(currentStep === 1 ? 'step1' : `step${currentStep}`).classList.remove('active');
+        document.getElementById(`step${step}`).classList.add('active');
+        currentStep = step;
+        updateSidebars();
+    }
+
+    function closeWizard() {
+        if (window.parent) window.parent.postMessage('closeWizard', '*');
+    }
+
+    // ── LOCATIEPRIJS ──────────────────────────────────────────────
+    let selectedLocationPrice = 0;
+
+    function getLocationCost() {
+        return selectedLocationPrice;
+    }
+
+    // ── SELECTIES ─────────────────────────────────────────────────
+    function selectLocation(card, value, price) {
+        // Single-select: deselect all others first
+        document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
+        if (document.getElementById('location').value === value) {
+            // Tweede klik = deselecteer
+            document.getElementById('location').value = '';
+            selectedLocationPrice = 0;
+        } else {
+            card.classList.add('selected');
+            document.getElementById('location').value = value;
+            selectedLocationPrice = price;
+        }
+        updateSidebars();
+    }
+
+    // ── OVERIGE DRANKEN ───────────────────────────────────────────
+    function isOverigeDrankenBlocked() {
+        const category = document.getElementById('category').value;
+        const guests   = parseInt(document.getElementById('guests').value) || 0;
+        return category === 'Zakelijk' && guests > 30;
+    }
+
+    function updateOverigeDranken() {
+        const card = document.getElementById('overigeDrankenCard');
+        const msg  = document.getElementById('overigeDrankenMsg');
+        if (!card) return;
+        const blocked = isOverigeDrankenBlocked();
+        if (blocked) {
+            card.style.display = 'none';
+            msg.style.display  = 'block';
+            // Als al geselecteerd, deselecteer
+            if (selectedCatering.has('Na calculatie van dranken')) {
+                selectedCatering.delete('Na calculatie van dranken');
+                card.classList.remove('selected');
+                syncCateringValue();
+                updateSidebars();
+            }
+        } else {
+            card.style.display = '';
+            msg.style.display  = 'none';
+        }
+    }
+
+    function toggleOverigeDranken(card) {
+        if (isOverigeDrankenBlocked()) return;
+        toggleCatering(card, 'Na calculatie van dranken');
+    }
+
+    // ── BEDRIJFSNAAM ZICHTBAARHEID ────────────────────────────────
+    function updateCompanyField() {
+        const category = document.getElementById('category').value;
+        const group    = document.getElementById('companyGroup');
+        const input    = document.getElementById('company');
+        if (category === 'Zakelijk') {
+            group.style.display = '';
+            input.placeholder   = 'Bedrijfsnaam *';
+        } else {
+            group.style.display = 'none';
+            input.value         = '';
+        }
+    }
+
+    document.getElementById('category').addEventListener('change', function() {
+        updateCompanyField();
+        updateOverigeDranken();
+    });
+    document.getElementById('guests').addEventListener('input', updateOverigeDranken);
+
+    function toggleCatering(card, value) {
+        if (selectedCatering.has(value)) {
+            selectedCatering.delete(value);
+            card.classList.remove('selected');
+        } else {
+            selectedCatering.add(value);
+            card.classList.add('selected');
+        }
+        syncCateringValue();
+        updateSidebars();
+    }
+
+    function toggleEntertainment(card, value) {
+        toggleCatering(card, value);
+    }
+
+    function selectDrinkArrangement(btn, hours) {
+        // Deselect previous
+        document.querySelectorAll('.drink-hour-btn').forEach(b => b.classList.remove('selected'));
+        if (selectedDrinkKey === hours) {
+            // tweede klik = deselecteer
+            selectedDrinkKey = null;
+        } else {
+            btn.classList.add('selected');
+            selectedDrinkKey = hours;
+        }
+        syncCateringValue();
+        updateSidebars();
+    }
+
+    function syncCateringValue() {
+        const all = Array.from(selectedCatering);
+        if (selectedDrinkKey) all.push(DRINK_HOURS[selectedDrinkKey].key);
+        document.getElementById('catering_value').value = all.join(',');
+    }
+
+    // ── SIDEBAR ───────────────────────────────────────────────────
+    function fmt(n) {
+        return '€\u00a0' + n.toFixed(2).replace('.', ',');
+    }
+
+    function getSummaryHTML() {
+        const category = document.getElementById('category').value || '—';
+        const guests   = parseInt(document.getElementById('guests').value) || 0;
+        const guestStr = guests || '—';
+        const dateVal  = document.getElementById('date').value;
+        const dateStr  = dateVal
+            ? new Date(dateVal).toLocaleDateString('nl-NL', {day:'numeric', month:'long', year:'numeric'})
+            : '—';
+
+        let itemsHTML     = '';
+        let totalFixed    = 0;  // vaste kosten (zaalhuur)
+        let totalPP       = 0;  // per persoon
+        let hasOnAanvraag = false;
+
+        // Zaalhuur
+        const locationCost = getLocationCost();
+        const locationValue = document.getElementById('location').value;
+        if (locationValue && locationCost > 0) {
+            totalFixed += locationCost;
+            itemsHTML += `
+                <div class="summary-price-row" style="font-size:0.72rem;">
+                    <span style="color:var(--text-muted); max-width:120px; line-height:1.3;">${locationValue}</span>
+                    <span style="white-space:nowrap;">${fmt(locationCost)}</span>
+                </div>`;
+        }
+
+        // Catering + drank + entertainment
+        const allSelected = [...selectedCatering];
+        if (selectedDrinkKey) allSelected.push(DRINK_HOURS[selectedDrinkKey].key);
+
+        allSelected.forEach(key => {
+            const info = PRICING[key];
+            if (!info) return;
+            if (info.price !== null) {
+                totalPP += info.price;
+                itemsHTML += `
+                    <div class="summary-price-row" style="font-size:0.72rem;">
+                        <span style="color:var(--text-muted); max-width:120px; line-height:1.3;">${key}</span>
+                        <span style="white-space:nowrap;">${fmt(info.price)} p.p.</span>
+                    </div>`;
+            } else if (info.nacalc) {
+                itemsHTML += `
+                    <div class="summary-price-row" style="font-size:0.72rem;">
+                        <span style="color:var(--text-muted); max-width:120px; line-height:1.3;">${key}</span>
+                        <span style="color:var(--text-muted); font-size:0.65rem; letter-spacing:0.5px;">Nacalculatie</span>
+                    </div>`;
+            } else {
+                hasOnAanvraag = true;
+                itemsHTML += `
+                    <div class="summary-price-row" style="font-size:0.72rem;">
+                        <span style="color:var(--text-muted); max-width:120px; line-height:1.3;">${key}</span>
+                        <span style="color:var(--accent); font-size:0.65rem; letter-spacing:0.5px;">Op aanvraag</span>
+                    </div>`;
+            }
+        });
+
+        const cateringTotal = totalPP * guests;
+        const grandTotal    = totalFixed + cateringTotal;
+        const hasItems      = !!locationValue || allSelected.length > 0;
+
+        const totalsHTML = hasItems ? `
+            <hr class="summary-divider">
+            ${guests > 0 && totalPP > 0 ? `<div class="summary-price-row" style="font-size:0.72rem;"><span style="color:var(--text-muted);">Catering (${guests} pers.)</span><span>${fmt(cateringTotal)}</span></div>` : ''}
+            ${grandTotal > 0 && guests > 0 ? `<div class="summary-price-row" style="margin-top:4px;"><span style="font-weight:600;">Totaal excl. BTW</span><span style="font-weight:600; color:var(--text-light);">${fmt(grandTotal)}</span></div>` : ''}
+            ${hasOnAanvraag ? `<div style="font-size:0.65rem; color:var(--text-muted); margin-top:6px; line-height:1.5;">* Op aanvraag-opties worden apart besproken</div>` : ''}
+        ` : `
+            <hr class="summary-divider">
+            <div style="font-size:0.72rem; color:var(--text-muted); text-align:center; padding:8px 0;">Nog geen opties geselecteerd</div>
+        `;
+
+        return `
+            <div class="sidebar-title">Samenvatting</div>
+            <div style="font-size:0.88rem; font-weight:600; color:var(--text-light); margin-bottom:8px;">${category}</div>
+            <div class="summary-item"><span class="icon">👥</span> ${guestStr} gasten</div>
+            <div class="summary-item"><span class="icon">📅</span> ${dateStr}</div>
+            ${itemsHTML ? `<hr class="summary-divider">${itemsHTML}` : ''}
+            ${totalsHTML}
+            <div class="sidebar-footer" style="margin-top:auto; padding-top:16px;">Powered by Yacht 5</div>
+        `;
+    }
+
+    function updateSidebars() {
+        const html = getSummaryHTML();
+        ['sidebar2','sidebar3','sidebar4'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+        });
+    }
+
+    // ── SUBMIT ────────────────────────────────────────────────────
+    async function submitForm() {
+        const category = document.getElementById('category').value;
+        const phone    = document.getElementById('contact_phone').value.trim();
+        const desc     = document.getElementById('description').value.trim();
+        const timing   = document.getElementById('timing').value.trim();
+        const company  = document.getElementById('company').value.trim();
+
+        const errors = [];
+        const email = document.getElementById('contact_email').value.trim();
+        if (category === 'Zakelijk' && !company) errors.push('Bedrijfsnaam is verplicht bij een zakelijk event.');
+        if (!email)   errors.push('E-mailadres is verplicht.');
+        if (!phone)   errors.push('Telefoonnummer is verplicht.');
+        if (!desc)    errors.push('Een korte beschrijving is verplicht.');
+        if (!timing)  errors.push('Begin- en eindtijd zijn verplicht.');
+
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
+            return;
+        }
+
+        const allCatering = Array.from(selectedCatering);
+        if (selectedDrinkKey) allCatering.push(DRINK_HOURS[selectedDrinkKey].key);
+
+        const data = {
+            category:    document.getElementById('category').value,
+            guests:      parseInt(document.getElementById('guests').value),
+            date:        document.getElementById('date').value,
+            location:    document.getElementById('location').value,
+            catering:    allCatering,
+            contact: {
+                name:    document.getElementById('first_name').value + ' ' + document.getElementById('last_name').value,
+                email:   document.getElementById('contact_email').value,
+                phone:   document.getElementById('contact_phone').value,
+                company: document.getElementById('company').value,
+                address: document.getElementById('address').value,
+                zipcode: document.getElementById('zipcode').value,
+                city:    document.getElementById('city').value,
+                country: document.getElementById('country').value,
+            },
+            description: document.getElementById('description').value,
+            timing:      document.getElementById('timing').value,
+            program:     document.getElementById('program').value,
+            questions:   document.getElementById('questions').value,
+        };
+
+        try {
+            const resp = await fetch('/api/quotation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                alert('Er is iets misgegaan: ' + (err.detail || resp.status));
+                return;
+            }
+
+            document.getElementById('step4').classList.remove('active');
+            document.getElementById('stepSuccess').classList.add('active');
+            currentStep = 'Success';
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+            alert('Verbindingsfout. Controleer of de server actief is.');
+        }
+    }
+
+    // ── IMAGE SLIDERS ─────────────────────────────────────────────
+    function initSliders() {
+        document.querySelectorAll('.img-slider').forEach(slider => {
+            const imgs = slider.querySelectorAll('.slider-img');
+            const dots = slider.querySelectorAll('.dot');
+            if (imgs.length <= 1) return;
+
+            let idx = 0;
+
+            function goTo(n) {
+                imgs[idx].classList.remove('active');
+                dots[idx].classList.remove('active');
+                idx = (n + imgs.length) % imgs.length;
+                imgs[idx].classList.add('active');
+                dots[idx].classList.add('active');
+            }
+
+            // Pijltjes injecteren
+            const prev = document.createElement('button');
+            prev.className = 'slider-arrow prev';
+            prev.innerHTML = '&#8249;';
+            prev.addEventListener('click', e => { e.stopPropagation(); goTo(idx - 1); });
+
+            const next = document.createElement('button');
+            next.className = 'slider-arrow next';
+            next.innerHTML = '&#8250;';
+            next.addEventListener('click', e => { e.stopPropagation(); goTo(idx + 1); });
+
+            slider.appendChild(prev);
+            slider.appendChild(next);
+
+            // Auto-advance elke 4 seconden
+            let timer = setInterval(() => goTo(idx + 1), 4000);
+            slider.addEventListener('mouseenter', () => clearInterval(timer));
+            slider.addEventListener('mouseleave', () => { timer = setInterval(() => goTo(idx + 1), 4000); });
+        });
+    }
+
+    // Init
+    updateSidebars();
+    updateCompanyField();
+    updateOverigeDranken();
+    initSliders();
+</script>
+
+</body>
+</html>

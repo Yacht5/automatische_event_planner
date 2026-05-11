@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: Beachclub WOW Website</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+        }
+        .hero {
+            height: 600px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 50px;
+            max-width: 800px;
+            margin: auto;
+            line-height: 1.6;
+        }
+        /* Navbar mockery */
+        nav {
+            background: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="font-weight: bold; font-size: 1.2rem;">BEACHCLUB WOW</div>
+    <div>Home | Menu | Events | Contact</div>
+</nav>
+
+<div class="hero">
+    <h1>Welkom bij Beachclub WOW</h1>
+    <p>De mooiste plek op het Zwarte Pad voor jouw event.</p>
+</div>
+
+<div class="content">
+    <h2>Plan je volgende feest bij ons</h2>
+    <p>Of het nu gaat om een zakelijke borrel, een bruiloft of een knallend feest: bij Beachclub WOW maken we er een onvergetelijke ervaring van. Gebruik onze snelle offerte-tool om direct een prijsindicatie te ontvangen.</p>
+</div>
+
+<!-- INTEGRATIE CODE START -->
+<!-- We laden het embed script vanaf onze lokale server -->
+<script src="/embed.js"></script>
+<script>
+    // We wachten tot de DOM geladen is
+    window.addEventListener('load', function() {
+        // Initialiseer de offerte tool
+        WOWOfferte.init({
+            buttonText: "OFFERTE AANVRAGEN",
+            buttonColor: "#d2b48c",
+            apiUrl: "http://localhost:8000" // We wijzen naar de lokale server
+        });
+    });
+</script>
+<!-- INTEGRATIE CODE EINDE -->
+
+</body>
+</html>

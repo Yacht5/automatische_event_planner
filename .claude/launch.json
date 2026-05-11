@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Beachclub WOW API",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-c", "import os, runpy; os.chdir('/Users/nielsheijman/Library/CloudStorage/OneDrive-Persoonlijk/Agentic Workflows/Yacht 5/Automatisering event aanvraag'); runpy.run_path('main.py', run_name='__main__')"],
+      "port": 8000
+    }
+  ]
+}
