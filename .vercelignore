@@ -1,10 +1,10 @@
-# Losse foto's in rootmap (staan ook in public/images/)
-*.jpg
-*.jpeg
-*.png
-*.pdf
+# Losse foto's en bestanden in de rootmap
+/*.jpg
+/*.jpeg
+/*.png
+/*.pdf
 
-# Dev bestanden
+# Dev en documentatie
 dev/
 blueprints/
 
