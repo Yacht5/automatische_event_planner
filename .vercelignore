@@ -1,0 +1,13 @@
+# Losse foto's in rootmap (staan ook in public/images/)
+*.jpg
+*.jpeg
+*.png
+*.pdf
+
+# Dev bestanden
+dev/
+blueprints/
+
+# Python cache
+__pycache__/
+*.pyc
