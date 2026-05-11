@@ -736,6 +736,11 @@
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         /* ── MOBILE ── */
+        /* ── MOBILE SUMMARY BAR ── */
+        .mobile-summary-bar {
+            display: none;
+        }
+
         @media (max-width: 640px) {
             body {
                 height: 100dvh;
@@ -743,6 +748,64 @@
 
             .wizard-sidebar {
                 display: none;
+            }
+
+            .mobile-summary-bar {
+                display: block;
+                background: var(--primary-dark);
+                border-top: 1px solid var(--border);
+            }
+
+            .mobile-summary-toggle {
+                width: 100%;
+                background: none;
+                border: none;
+                color: var(--text-light);
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.75rem;
+                font-weight: 600;
+                letter-spacing: 1px;
+                padding: 10px 16px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+                text-align: left;
+            }
+
+            .mobile-summary-toggle .toggle-label {
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-size: 0.7rem;
+            }
+
+            .mobile-summary-toggle .toggle-arrow {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                transition: transform 0.2s;
+            }
+
+            .mobile-summary-toggle.open .toggle-arrow {
+                transform: rotate(180deg);
+            }
+
+            .mobile-summary-content {
+                display: none;
+                padding: 0 16px 12px;
+                border-top: 1px solid var(--border);
+            }
+
+            .mobile-summary-content.open {
+                display: block;
+            }
+
+            .mobile-summary-content .summary-item {
+                padding: 3px 0;
+            }
+
+            .mobile-summary-content .summary-divider {
+                margin: 8px 0;
             }
 
             .wizard-main {
@@ -938,6 +1001,13 @@
             <div class="wizard-sidebar" id="sidebar2">
                 <!-- filled by JS -->
             </div>
+        </div>
+        <div class="mobile-summary-bar">
+            <button class="mobile-summary-toggle" onclick="toggleMobileSummary(this)">
+                <span class="toggle-label">Samenvatting</span>
+                <span class="toggle-arrow">▲</span>
+            </button>
+            <div class="mobile-summary-content" id="mobileSummary2"></div>
         </div>
         <div class="wizard-footer">
             <span class="step-counter">Stap 2 / 4</span>
@@ -1186,6 +1256,13 @@
             </div>
             <div class="wizard-sidebar" id="sidebar3"></div>
         </div>
+        <div class="mobile-summary-bar">
+            <button class="mobile-summary-toggle" onclick="toggleMobileSummary(this)">
+                <span class="toggle-label">Samenvatting</span>
+                <span class="toggle-arrow">▲</span>
+            </button>
+            <div class="mobile-summary-content" id="mobileSummary3"></div>
+        </div>
         <div class="wizard-footer">
             <span class="step-counter">Stap 3 / 4</span>
             <div class="footer-right">
@@ -1263,6 +1340,13 @@
 
             </div>
             <div class="wizard-sidebar" id="sidebar4"></div>
+        </div>
+        <div class="mobile-summary-bar">
+            <button class="mobile-summary-toggle" onclick="toggleMobileSummary(this)">
+                <span class="toggle-label">Samenvatting</span>
+                <span class="toggle-arrow">▲</span>
+            </button>
+            <div class="mobile-summary-content" id="mobileSummary4"></div>
         </div>
         <div class="wizard-footer">
             <span class="step-counter">Stap 4 / 4</span>
@@ -1520,11 +1604,49 @@
         `;
     }
 
+    function getMobileSummaryHTML() {
+        const category = document.getElementById('category').value || '—';
+        const guests   = parseInt(document.getElementById('guests').value) || 0;
+        const dateVal  = document.getElementById('date').value;
+        const dateStr  = dateVal
+            ? new Date(dateVal).toLocaleDateString('nl-NL', {day:'numeric', month:'long'})
+            : '—';
+        const locationValue = document.getElementById('location').value;
+        const allSelected = [...selectedCatering];
+        if (selectedDrinkKey) allSelected.push(DRINK_HOURS[selectedDrinkKey].key);
+
+        let lines = `<div class="summary-item"><span class="icon">🎉</span> ${category}</div>`;
+        lines += `<div class="summary-item"><span class="icon">👥</span> ${guests || '—'} gasten</div>`;
+        lines += `<div class="summary-item"><span class="icon">📅</span> ${dateStr}</div>`;
+        if (locationValue) {
+            lines += `<hr class="summary-divider"><div class="summary-item"><span class="icon">📍</span> ${locationValue}</div>`;
+        }
+        if (allSelected.length > 0) {
+            if (!locationValue) lines += `<hr class="summary-divider">`;
+            allSelected.forEach(k => {
+                lines += `<div class="summary-item" style="padding-left:4px;">· ${k}</div>`;
+            });
+        }
+        return lines;
+    }
+
+    function toggleMobileSummary(btn) {
+        const content = btn.nextElementSibling;
+        const isOpen = content.classList.contains('open');
+        content.classList.toggle('open', !isOpen);
+        btn.classList.toggle('open', !isOpen);
+    }
+
     function updateSidebars() {
         const html = getSummaryHTML();
         ['sidebar2','sidebar3','sidebar4'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.innerHTML = html;
+        });
+        const mobileHTML = getMobileSummaryHTML();
+        ['mobileSummary2','mobileSummary3','mobileSummary4'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = mobileHTML;
         });
     }
 
