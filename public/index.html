@@ -734,6 +734,99 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+            body {
+                height: 100dvh;
+            }
+
+            .wizard-sidebar {
+                display: none;
+            }
+
+            .wizard-main {
+                padding: 20px 16px 16px;
+            }
+
+            #step1-wrapper {
+                padding: 24px 16px 16px;
+                max-width: 100%;
+            }
+
+            .step1-title {
+                font-size: 1.4rem;
+            }
+
+            .location-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .location-card-img,
+            .location-card-img.img-slider {
+                height: 200px;
+            }
+
+            .catering-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .catering-img-placeholder,
+            .catering-img-placeholder.img-slider {
+                height: 130px;
+            }
+
+            .ent-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ent-img,
+            .ent-img.img-slider {
+                height: 110px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .drink-hours {
+                gap: 8px;
+            }
+
+            .drink-hour-btn {
+                min-width: 60px;
+                padding: 8px 10px;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.7rem;
+            }
+
+            .wizard-footer {
+                padding: 12px 16px;
+            }
+
+            .step-title {
+                font-size: 1.2rem;
+            }
+
+            /* Slider pijltjes altijd zichtbaar op touch */
+            .slider-arrow {
+                opacity: 0.7;
+                width: 32px;
+                height: 44px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .catering-grid {
+                grid-template-columns: 1fr;
+            }
+            .ent-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1534,6 +1627,14 @@
 
             slider.appendChild(prev);
             slider.appendChild(next);
+
+            // Touch swipe
+            let touchStartX = 0;
+            slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+            slider.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                if (Math.abs(dx) > 40) goTo(dx < 0 ? idx + 1 : idx - 1);
+            }, { passive: true });
 
             // Auto-advance elke 4 seconden
             let timer = setInterval(() => goTo(idx + 1), 4000);
