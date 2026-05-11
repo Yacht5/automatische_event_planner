@@ -1,8 +1,11 @@
+import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI(title="Yacht 5 Event Planner API")
 
@@ -15,7 +18,7 @@ app.add_middleware(
 
 app.include_router(router)
 
-app.mount("/", StaticFiles(directory="public", html=True), name="public")
+app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "public"), html=True), name="public")
 
 if __name__ == "__main__":
     import uvicorn
