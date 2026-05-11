@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,9 +15,7 @@ app.add_middleware(
 
 app.include_router(router)
 
-# Lokaal: serveer static files via FastAPI. Op Vercel doet @vercel/static dit.
-if os.path.isdir("public"):
-    app.mount("/", StaticFiles(directory="public", html=True), name="public")
+app.mount("/", StaticFiles(directory="public", html=True), name="public")
 
 if __name__ == "__main__":
     import uvicorn
