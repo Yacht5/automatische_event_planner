@@ -11,7 +11,7 @@ from systems.quote_calculator import calculate_quote
 from systems.moneybird import create_and_send_estimate
 from systems.mail_sender import send_notification_email
 
-NTFY_TOPIC = os.getenv("NTFY_TOPIC") or os.getenv("NTFY.SH", "")
+NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
 
 def _send_ntfy(title: str, message: str):
     if not NTFY_TOPIC:
