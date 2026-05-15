@@ -77,7 +77,7 @@ def create_quotation(request: QuotationRequest):
             _requests.post(
                 f"https://ntfy.sh/{topic}",
                 data=msg.encode("utf-8"),
-                headers={"Title": f"Aanvraag — {c.name}", "Priority": "high", "Tags": "bell"},
+                headers={"Title": f"Aanvraag - {c.name}", "Priority": "high", "Tags": "bell"},
                 timeout=8,
             )
         except Exception as ex:
