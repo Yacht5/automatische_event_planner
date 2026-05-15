@@ -1029,6 +1029,7 @@
             </button>
             <div class="mobile-summary-content" id="mobileSummary2"></div>
         </div>
+        <div id="step2-error" style="color:#e07070; font-size:0.78rem; padding:6px 24px; display:none; background:var(--primary-dark);">Selecteer een ruimte om verder te gaan.</div>
         <div class="wizard-footer">
             <span class="step-counter">Stap 2 / 4</span>
             <div class="footer-right">
@@ -1280,6 +1281,7 @@
             </button>
             <div class="mobile-summary-content" id="mobileSummary3"></div>
         </div>
+        <div id="step3-error" style="color:#e07070; font-size:0.78rem; padding:6px 24px; display:none; background:var(--primary-dark);">Selecteer minimaal één optie om verder te gaan.</div>
         <div class="wizard-footer">
             <span class="step-counter">Stap 3 / 4</span>
             <div class="footer-right">
@@ -1484,6 +1486,23 @@
             const end    = document.getElementById('end_time').value;
             const err    = document.getElementById('step1-error');
             if (!guests || parseInt(guests) < 1 || !date || (!timesUnknown() && (!start || !end))) {
+                err.style.display = 'block';
+                return;
+            }
+            err.style.display = 'none';
+        }
+        if (currentStep === 2 && step > 2) {
+            const err = document.getElementById('step2-error');
+            if (!document.getElementById('location').value) {
+                err.style.display = 'block';
+                return;
+            }
+            err.style.display = 'none';
+        }
+        if (currentStep === 3 && step > 3) {
+            const err = document.getElementById('step3-error');
+            const hasSelection = selectedCatering.size > 0 || selectedDrinkKey;
+            if (!hasSelection) {
                 err.style.display = 'block';
                 return;
             }
