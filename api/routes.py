@@ -50,12 +50,6 @@ async def create_quotation(request: QuotationRequest):
             "country": request.contact.country or "NL",
         }
 
-        moneybird_result = create_and_send_estimate(
-            calculation=calculation,
-            event_data=event_data,
-            contact_info=contact_info,
-        )
-
         catering_str = ", ".join(event_data.get("catering", [])) or "—"
         _send_ntfy(
             title=f"Nieuwe aanvraag — {contact_info['name']}",
@@ -66,6 +60,12 @@ async def create_quotation(request: QuotationRequest):
                 f"{catering_str}\n"
                 f"{contact_info.get('email', '')} | {contact_info.get('phone', '')}"
             ),
+        )
+
+        moneybird_result = create_and_send_estimate(
+            calculation=calculation,
+            event_data=event_data,
+            contact_info=contact_info,
         )
 
 
