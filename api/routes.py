@@ -1,10 +1,30 @@
 import logging
+import os
+import requests as _requests
 from fastapi import APIRouter, HTTPException
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from api.models import QuotationRequest
 from systems.quote_calculator import calculate_quote
 from systems.moneybird import create_and_send_estimate
 from systems.mail_sender import send_notification_email
+
+NTFY_TOPIC = os.getenv("NTFY_TOPIC") or os.getenv("NTFY.SH", "")
+
+def _send_ntfy(title: str, message: str):
+    if not NTFY_TOPIC:
+        return
+    try:
+        _requests.post(
+            f"https://ntfy.sh/{NTFY_TOPIC}",
+            data=message.encode("utf-8"),
+            headers={"Title": title, "Priority": "high", "Tags": "bell"},
+            timeout=5,
+        )
+    except Exception:
+        pass
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
@@ -37,6 +57,18 @@ async def create_quotation(request: QuotationRequest):
             event_data=event_data,
             contact_info=contact_info,
             moneybird_url=moneybird_result.get("estimate_url", ""),
+        )
+
+        catering_str = ", ".join(event_data.get("catering", [])) or "—"
+        _send_ntfy(
+            title=f"Nieuwe aanvraag — {contact_info['name']}",
+            message=(
+                f"{event_data.get('date', '—')} | {event_data.get('timing', '—')} | "
+                f"{event_data.get('guests', '—')} gasten\n"
+                f"{event_data.get('location', '—')}\n"
+                f"{catering_str}\n"
+                f"{contact_info.get('email', '')} | {contact_info.get('phone', '')}"
+            ),
         )
 
         return {
