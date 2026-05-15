@@ -896,11 +896,8 @@
 
 <div class="wizard-wrapper">
 
-    <!-- CLOSE BUTTON -->
-    <button class="close-btn" onclick="closeWizard()">&#x2715;</button>
-
-    <!-- LOGO -->
-    <img src="/images/logo_yacht5.jpeg" alt="Yacht 5" style="position:absolute;top:12px;left:16px;height:32px;width:32px;object-fit:contain;opacity:0.85;z-index:10;border-radius:50%;">
+    <!-- LOGO rechtsboven -->
+    <img src="/images/logo_yacht5.jpeg" alt="Yacht 5" style="position:absolute;top:12px;right:16px;height:32px;width:32px;object-fit:contain;opacity:0.85;z-index:10;border-radius:50%;">
 
     <!-- STEP 1: Intro + basis -->
     <div class="step active" id="step1" style="flex:1; overflow:hidden; flex-direction:column;">
@@ -928,17 +925,23 @@
                     <input type="date" id="date">
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group" style="margin:0">
-                    <label>Begintijd <span style="color:var(--accent);">*</span></label>
-                    <input type="time" id="start_time">
-                </div>
-                <div class="form-group" style="margin:0">
-                    <label>Eindtijd <span style="color:var(--accent);">*</span></label>
-                    <input type="time" id="end_time">
+            <div id="timeFields">
+                <div class="form-row">
+                    <div class="form-group" style="margin:0">
+                        <label>Begintijd <span style="color:var(--accent);">*</span></label>
+                        <input type="time" id="start_time">
+                    </div>
+                    <div class="form-group" style="margin:0">
+                        <label>Eindtijd <span style="color:var(--accent);">*</span></label>
+                        <input type="time" id="end_time">
+                    </div>
                 </div>
             </div>
-            <div id="step1-error" style="color:#e07070; font-size:0.78rem; margin-top:8px; display:none;">Vul een datum, tijden en aantal gasten in om verder te gaan.</div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="timesUnknown" style="width:auto; accent-color:var(--accent);" onchange="toggleTimesUnknown()">
+                <label for="timesUnknown" style="margin:0; font-size:0.75rem; text-transform:none; letter-spacing:0; color:var(--text-muted); cursor:pointer;">Tijden nog onbekend</label>
+            </div>
+            <div id="step1-error" style="color:#e07070; font-size:0.78rem; margin-top:8px; display:none;">Vul een datum en aantal gasten in om verder te gaan.</div>
         </div>
 
         <div class="wizard-footer">
@@ -1420,6 +1423,21 @@
     };
 
     // ── NAVIGATIE ─────────────────────────────────────────────────
+    function toggleTimesUnknown() {
+        const cb = document.getElementById('timesUnknown');
+        const fields = document.getElementById('timeFields');
+        fields.style.display = cb.checked ? 'none' : '';
+        if (cb.checked) {
+            document.getElementById('start_time').value = '';
+            document.getElementById('end_time').value = '';
+            updateDrinkTimingHint();
+        }
+    }
+
+    function timesUnknown() {
+        return document.getElementById('timesUnknown').checked;
+    }
+
     function getEventDurationHours() {
         const start = document.getElementById('start_time').value;
         const end   = document.getElementById('end_time').value;
@@ -1461,7 +1479,7 @@
             const start  = document.getElementById('start_time').value;
             const end    = document.getElementById('end_time').value;
             const err    = document.getElementById('step1-error');
-            if (!guests || parseInt(guests) < 1 || !date || !start || !end) {
+            if (!guests || parseInt(guests) < 1 || !date || (!timesUnknown() && (!start || !end))) {
                 err.style.display = 'block';
                 return;
             }
@@ -1737,7 +1755,7 @@
                 country: document.getElementById('country').value,
             },
             description: document.getElementById('description').value,
-            timing:      `${document.getElementById('start_time').value} – ${document.getElementById('end_time').value}`,
+            timing:      timesUnknown() ? 'Nog onbekend' : `${document.getElementById('start_time').value} – ${document.getElementById('end_time').value}`,
             program:     document.getElementById('program').value,
             questions:   document.getElementById('questions').value,
         };
