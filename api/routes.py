@@ -51,7 +51,21 @@ def test_ntfy():
 
 @router.post("/quotation")
 async def create_quotation(request: QuotationRequest):
-    # Notificatie als allereerste — onafhankelijk van wat er daarna misgaat
+    # Notificatie direct inline, exact zoals test-ntfy
+    topic = os.getenv("NTFY_TOPIC", "")
+    print(f"[quotation] NTFY_TOPIC={topic!r}")
+    if topic:
+        try:
+            r = _requests.post(
+                f"https://ntfy.sh/{topic}",
+                data=f"Nieuwe aanvraag — {request.contact.name}".encode("utf-8"),
+                headers={"Title": f"Aanvraag {request.contact.name}", "Priority": "high", "Tags": "bell"},
+                timeout=8,
+            )
+            print(f"[quotation] ntfy={r.status_code}")
+        except Exception as ex:
+            print(f"[quotation] ntfy fout: {ex}")
+
     contact_info = {
         "name":    request.contact.name,
         "email":   request.contact.email,
@@ -63,17 +77,6 @@ async def create_quotation(request: QuotationRequest):
         "country": request.contact.country or "NL",
     }
     event_data = request.dict()
-    catering_str = ", ".join(event_data.get("catering", [])) or "—"
-    _send_ntfy(
-        title=f"Nieuwe aanvraag — {contact_info['name']}",
-        message=(
-            f"{event_data.get('date', '—')} | {event_data.get('timing', '—')} | "
-            f"{event_data.get('guests', '—')} gasten\n"
-            f"{event_data.get('location', '—')}\n"
-            f"{catering_str}\n"
-            f"{contact_info.get('email', '')} | {contact_info.get('phone', '')}"
-        ),
-    )
 
     try:
         calculation = calculate_quote(event_data)
