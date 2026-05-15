@@ -928,7 +928,17 @@
                     <input type="date" id="date">
                 </div>
             </div>
-            <div id="step1-error" style="color:#e07070; font-size:0.78rem; margin-top:8px; display:none;">Vul een datum en aantal gasten in om verder te gaan.</div>
+            <div class="form-row">
+                <div class="form-group" style="margin:0">
+                    <label>Begintijd <span style="color:var(--accent);">*</span></label>
+                    <input type="time" id="start_time">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Eindtijd <span style="color:var(--accent);">*</span></label>
+                    <input type="time" id="end_time">
+                </div>
+            </div>
+            <div id="step1-error" style="color:#e07070; font-size:0.78rem; margin-top:8px; display:none;">Vul een datum, tijden en aantal gasten in om verder te gaan.</div>
         </div>
 
         <div class="wizard-footer">
@@ -953,7 +963,7 @@
                         </div>
                         <div class="location-card-body">
                             <div>
-                                <div class="location-card-name">Bovenruimte tot 70 pax</div>
+                                <div class="location-card-name">Bovenruimte tot <strong>70 pax</strong></div>
                                 <div class="location-card-price">€800</div>
                             </div>
                             <div class="location-card-check">✓</div>
@@ -966,7 +976,7 @@
                         </div>
                         <div class="location-card-body">
                             <div>
-                                <div class="location-card-name">Bovenruimte 70+ pax</div>
+                                <div class="location-card-name">Bovenruimte <strong>70+ pax</strong></div>
                                 <div class="location-card-price">€1.000</div>
                             </div>
                             <div class="location-card-check">✓</div>
@@ -1043,9 +1053,8 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Lunch 2-gangen')">
-                        <div class="catering-img-placeholder img-slider">
-                            <img src="/images/Eten02.jpg" class="slider-img active"><img src="/images/Eten03.jpg" class="slider-img"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img">
-                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <div class="catering-img-placeholder">
+                            <img src="/images/Eten02.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
@@ -1057,9 +1066,8 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Lunch 3-gangen')">
-                        <div class="catering-img-placeholder img-slider">
-                            <img src="/images/Eten03.jpg" class="slider-img active"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img"><img src="/images/Eten02.jpg" class="slider-img">
-                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <div class="catering-img-placeholder">
+                            <img src="/images/Eten03.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
@@ -1093,9 +1101,8 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Walking Dinner 4-gangen')">
-                        <div class="catering-img-placeholder img-slider">
-                            <img src="/images/Eten01.jpg" class="slider-img active"><img src="/images/Eten03.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten02.jpg" class="slider-img"><img src="/images/Eten04.jpg" class="slider-img">
-                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <div class="catering-img-placeholder">
+                            <img src="/images/Eten01.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
@@ -1107,9 +1114,8 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Walking Dinner 5-gangen')">
-                        <div class="catering-img-placeholder img-slider">
-                            <img src="/images/Eten02.jpg" class="slider-img active"><img src="/images/Eten04.jpg" class="slider-img"><img src="/images/Eten01.jpg" class="slider-img"><img src="/images/Eten05.jpg" class="slider-img"><img src="/images/Eten03.jpg" class="slider-img">
-                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <div class="catering-img-placeholder">
+                            <img src="/images/Eten04.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
@@ -1121,9 +1127,8 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Barbecue')">
-                        <div class="catering-img-placeholder img-slider">
-                            <img src="/images/BBQ.jpg" class="slider-img active"><img src="/images/BBQ01.jpg" class="slider-img"><img src="/images/BBQ02.jpg" class="slider-img"><img src="/images/BBQ03.jpg" class="slider-img" style="object-fit:contain;background:#5d5c38;"><img src="/images/BBQ04.jpg" class="slider-img" style="object-fit:contain;background:#5d5c38;">
-                            <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <div class="catering-img-placeholder">
+                            <img src="/images/BBQ.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
@@ -1175,7 +1180,7 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div id="overigeDrankenMsg" style="display:none; font-size:0.72rem; color:var(--text-muted); padding:6px 4px; grid-column:1/-1;">
-                        ⚠ Na calculatie van dranken is niet beschikbaar voor zakelijke events met meer dan 30 personen.
+                        ℹ Vanaf 30 personen geldt een drankarrangement (bier, fris, wijn) op basis van tijd. Overige dranken worden standaard berekend op nacalculatie.
                     </div>
                 </div>
 
@@ -1184,6 +1189,8 @@
                         <span class="drink-title">Drankarrangement</span>
                         <span class="drink-subtitle">Bier, wijn &amp; fris — kies een duur</span>
                     </div>
+                    <div id="drinkTimingHint" style="display:none; font-size:0.72rem; color:var(--accent); margin-bottom:10px; padding:6px 10px; background:rgba(200,168,75,0.1); border-radius:3px; border-left:2px solid var(--accent);"></div>
+                    <div id="drinkTimingWarn" style="display:none; font-size:0.72rem; color:#e09060; margin-bottom:10px; padding:6px 10px; background:rgba(224,144,96,0.1); border-radius:3px; border-left:2px solid #e09060;"></div>
                     <div class="drink-hours" id="drinkHours">
                         <button class="drink-hour-btn" onclick="selectDrinkArrangement(this, '2u')">
                             <span class="dh-hours">2 uur</span>
@@ -1240,7 +1247,7 @@
                         <div class="ent-badge">Op aanvraag</div>
                     </div>
                     <div class="ent-card" onclick="toggleEntertainment(this, 'DJ')">
-                        <div class="ent-img img-slider"><img src="/images/DJ01.jpg" class="slider-img active"><img src="/images/DJ02.jpg" class="slider-img"><div class="slider-dots"><span class="dot active"></span><span class="dot"></span></div></div>
+                        <div class="ent-img"><img src="/images/DJ01.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
                         <div class="ent-check">✓</div>
                         <div class="ent-label">DJ</div>
                         <div class="ent-desc">DJ op maat voor uw event</div>
@@ -1413,12 +1420,48 @@
     };
 
     // ── NAVIGATIE ─────────────────────────────────────────────────
+    function getEventDurationHours() {
+        const start = document.getElementById('start_time').value;
+        const end   = document.getElementById('end_time').value;
+        if (!start || !end) return null;
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let mins = (eh * 60 + em) - (sh * 60 + sm);
+        if (mins <= 0) mins += 24 * 60;
+        return mins / 60;
+    }
+
+    function updateDrinkTimingHint() {
+        const hint = document.getElementById('drinkTimingHint');
+        const warn = document.getElementById('drinkTimingWarn');
+        if (!hint || !warn) return;
+        const duration = getEventDurationHours();
+        if (!duration) { hint.style.display = 'none'; warn.style.display = 'none'; return; }
+
+        const roundedHours = Math.min(6, Math.max(2, Math.round(duration)));
+        const suggestedKey = `${roundedHours}u`;
+        const suggested = DRINK_HOURS[suggestedKey];
+
+        hint.style.display = 'block';
+        hint.textContent = `Op basis van uw tijden (${Math.round(duration * 10) / 10} uur) adviseren wij het ${suggested.label}-arrangement.`;
+
+        if (selectedDrinkKey && selectedDrinkKey !== suggestedKey) {
+            const selected = DRINK_HOURS[selectedDrinkKey];
+            warn.style.display = 'block';
+            warn.textContent = `Let op: u heeft ${selected.label} geselecteerd, maar uw event duurt ca. ${Math.round(duration * 10) / 10} uur.`;
+        } else {
+            warn.style.display = 'none';
+        }
+    }
+
     function goTo(step) {
         if (currentStep === 1 && step > 1) {
             const guests = document.getElementById('guests').value;
             const date   = document.getElementById('date').value;
+            const start  = document.getElementById('start_time').value;
+            const end    = document.getElementById('end_time').value;
             const err    = document.getElementById('step1-error');
-            if (!guests || parseInt(guests) < 1 || !date) {
+            if (!guests || parseInt(guests) < 1 || !date || !start || !end) {
                 err.style.display = 'block';
                 return;
             }
@@ -1428,6 +1471,7 @@
         document.getElementById(`step${step}`).classList.add('active');
         currentStep = step;
         updateSidebars();
+        if (step === 3) updateDrinkTimingHint();
     }
 
     function closeWizard() {
@@ -1527,10 +1571,8 @@
     }
 
     function selectDrinkArrangement(btn, hours) {
-        // Deselect previous
         document.querySelectorAll('.drink-hour-btn').forEach(b => b.classList.remove('selected'));
         if (selectedDrinkKey === hours) {
-            // tweede klik = deselecteer
             selectedDrinkKey = null;
         } else {
             btn.classList.add('selected');
@@ -1538,6 +1580,7 @@
         }
         syncCateringValue();
         updateSidebars();
+        updateDrinkTimingHint();
     }
 
     function syncCateringValue() {
@@ -1694,7 +1737,7 @@
                 country: document.getElementById('country').value,
             },
             description: document.getElementById('description').value,
-            timing:      document.getElementById('timing').value,
+            timing:      `${document.getElementById('start_time').value} – ${document.getElementById('end_time').value}`,
             program:     document.getElementById('program').value,
             questions:   document.getElementById('questions').value,
         };

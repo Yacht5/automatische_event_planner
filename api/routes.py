@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from api.models import QuotationRequest
 from systems.quote_calculator import calculate_quote
 from systems.moneybird import create_and_send_estimate
+from systems.mail_sender import send_notification_email
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
@@ -30,6 +31,12 @@ async def create_quotation(request: QuotationRequest):
             calculation=calculation,
             event_data=event_data,
             contact_info=contact_info,
+        )
+
+        send_notification_email(
+            event_data=event_data,
+            contact_info=contact_info,
+            moneybird_url=moneybird_result.get("estimate_url", ""),
         )
 
         return {

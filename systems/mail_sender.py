@@ -57,6 +57,58 @@ Zwarte Pad 58, Scheveningen
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+def send_notification_email(event_data: dict, contact_info: dict, moneybird_url: str = ""):
+    """Stuurt een notificatie naar events@yacht5.nl bij een nieuwe aanvraag."""
+    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
+        return {"status": "error", "message": "Gmail credentials missing in .env"}
+
+    msg = EmailMessage()
+    msg['Subject'] = f"Nieuwe event aanvraag — {contact_info.get('name', '')} ({event_data.get('date', '')})"
+    msg['From'] = f"Yacht 5 Event Planner <{GMAIL_USER}>"
+    msg['To'] = "events@yacht5.nl"
+
+    catering = event_data.get('catering', [])
+    catering_str = ', '.join(catering) if catering else '—'
+
+    body = f"""Nieuwe aanvraag binnengekomen via de event planner.
+
+CONTACT
+Naam:        {contact_info.get('name', '—')}
+E-mail:      {contact_info.get('email', '—')}
+Telefoon:    {contact_info.get('phone', '—')}
+Bedrijf:     {contact_info.get('company', '—')}
+
+EVENT
+Datum:       {event_data.get('date', '—')}
+Tijden:      {event_data.get('timing', '—')}
+Gasten:      {event_data.get('guests', '—')}
+Categorie:   {event_data.get('category', '—')}
+Locatie:     {event_data.get('location', '—')}
+Catering:    {catering_str}
+
+Omschrijving:
+{event_data.get('description', '—')}
+
+Programma:
+{event_data.get('program', '—')}
+
+Vragen:
+{event_data.get('questions', '—')}
+
+{f'Moneybird offerte: {moneybird_url}' if moneybird_url else ''}
+"""
+    msg.set_content(body)
+
+    context = ssl.create_default_context()
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+            server.send_message(msg)
+        return {"status": "success"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     # Test call
     import sys
