@@ -200,11 +200,19 @@ def create_estimate(contact_id: str, calculation: dict, event_data: dict) -> dic
 
 # ── OFFERTE VERSTUREN ─────────────────────────────────────────────────────────
 
-def send_estimate(estimate_id: str) -> dict:
+def send_estimate(estimate_id: str, email: str = "", name: str = "") -> dict:
     """Verstuur de offerte via Moneybird naar het e-mailadres van het contact."""
+    payload = {
+        "estimate_email": {
+            "send_method":        "email",
+            "email":              email,
+            "email_message":      f"Beste {name},\n\nHierbij ontvangt u de offerte van Yacht 5.\n\nMet vriendelijke groet,\nTeam Yacht 5",
+            "subject":            "Uw offerte van Yacht 5",
+        }
+    }
     result = requests.patch(
         f"{BASE_URL}/estimates/{estimate_id}/send_estimate.json",
-        json={"send_method": "email"},
+        json=payload,
         headers=HEADERS,
         timeout=15,
     )
@@ -230,7 +238,11 @@ def create_and_send_estimate(calculation: dict, event_data: dict, contact_info: 
     estimate   = create_estimate(contact_id, calculation, event_data)
     estimate_id = estimate["id"]
 
-    send_result = send_estimate(estimate_id)
+    send_result = send_estimate(
+        estimate_id,
+        email=contact_info.get("email", ""),
+        name=contact_info.get("name", ""),
+    )
 
     return {
         "estimate_id":  estimate_id,
