@@ -1344,10 +1344,7 @@
                     <label>Geef een korte beschrijving van het event <span style="color:var(--accent);">*</span></label>
                     <textarea id="description" placeholder="Beschrijving..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Wat is de begin- en eindtijd van het event? <span style="color:var(--accent);">*</span></label>
-                    <textarea id="timing" placeholder="Bijv. 14:00 – 23:00"></textarea>
-                </div>
+
                 <div class="form-group">
                     <label>Vul hier het programma in (optioneel)</label>
                     <textarea id="program" placeholder="Programma..."></textarea>
@@ -1381,7 +1378,7 @@
         <div class="success-page">
             <div class="success-icon">✓</div>
             <h2>Bedankt!</h2>
-            <p>Uw aanvraag is verwerkt. U ontvangt zo spoedig mogelijk de offerte per e-mail.<br><br>
+            <p>Uw aanvraag is verwerkt. U ontvangt binnen 5 minuten de offerte per e-mail.<br><br>
             Heeft u vragen? Bel ons op <strong style="color:var(--text-light);">+31 475 202 412</strong>.</p>
         </div>
     </div>
@@ -1745,7 +1742,6 @@
         const category = document.getElementById('category').value;
         const phone    = document.getElementById('contact_phone').value.trim();
         const desc     = document.getElementById('description').value.trim();
-        const timing   = document.getElementById('timing').value.trim();
         const company  = document.getElementById('company').value.trim();
 
         const errors = [];
@@ -1754,7 +1750,6 @@
         if (!email)   errors.push('E-mailadres is verplicht.');
         if (!phone)   errors.push('Telefoonnummer is verplicht.');
         if (!desc)    errors.push('Een korte beschrijving is verplicht.');
-        if (!timing)  errors.push('Begin- en eindtijd zijn verplicht.');
 
         if (errors.length > 0) {
             alert(errors.join('\n'));
