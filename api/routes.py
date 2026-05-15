@@ -56,13 +56,30 @@ def create_quotation(request: QuotationRequest):
     print(f"[quotation] NTFY_TOPIC={topic!r}")
     if topic:
         try:
-            r = _requests.post(
+            c = request.contact
+            ed = request.dict()
+            catering = ", ".join(ed.get("catering", [])) or "—"
+            timing = ed.get("timing") or "Onbekend"
+            msg = (
+                f"📅 {ed.get('date', '—')} | {timing}\n"
+                f"👥 {ed.get('guests', '—')} personen | {ed.get('category', '—')}\n"
+                f"📍 {ed.get('location', '—')}\n"
+                f"🍽 {catering}\n"
+                f"📝 {ed.get('description', '—')}\n"
+                f"🎤 Programma: {ed.get('program') or '—'}\n"
+                f"❓ Vragen: {ed.get('questions') or '—'}\n"
+                f"──────────────\n"
+                f"👤 {c.name}\n"
+                f"📧 {c.email}\n"
+                f"📱 {c.phone}\n"
+                f"🏢 {c.company or '—'}"
+            )
+            _requests.post(
                 f"https://ntfy.sh/{topic}",
-                data=f"Nieuwe aanvraag — {request.contact.name}".encode("utf-8"),
-                headers={"Title": f"Aanvraag {request.contact.name}", "Priority": "high", "Tags": "bell"},
+                data=msg.encode("utf-8"),
+                headers={"Title": f"Aanvraag — {c.name}", "Priority": "high", "Tags": "bell"},
                 timeout=8,
             )
-            print(f"[quotation] ntfy={r.status_code}")
         except Exception as ex:
             print(f"[quotation] ntfy fout: {ex}")
 
