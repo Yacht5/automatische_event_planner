@@ -50,7 +50,7 @@ def test_ntfy():
 
 
 @router.post("/quotation")
-async def create_quotation(request: QuotationRequest):
+def create_quotation(request: QuotationRequest):
     # Notificatie direct inline, exact zoals test-ntfy
     topic = os.getenv("NTFY_TOPIC", "")
     print(f"[quotation] NTFY_TOPIC={topic!r}")
