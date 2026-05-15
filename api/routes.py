@@ -11,23 +11,19 @@ from systems.quote_calculator import calculate_quote
 from systems.moneybird import create_and_send_estimate
 
 
-NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
-
 def _send_ntfy(title: str, message: str):
-    print(f"[ntfy] topic='{NTFY_TOPIC}'")
-    if not NTFY_TOPIC:
-        print("[ntfy] NTFY_TOPIC niet ingesteld, overgeslagen")
+    topic = os.getenv("NTFY_TOPIC", "")
+    if not topic:
         return
     try:
-        resp = _requests.post(
-            f"https://ntfy.sh/{NTFY_TOPIC}",
+        _requests.post(
+            f"https://ntfy.sh/{topic}",
             data=message.encode("utf-8"),
             headers={"Title": title, "Priority": "high", "Tags": "bell"},
             timeout=5,
         )
-        print(f"[ntfy] response: {resp.status_code} {resp.text[:100]}")
-    except Exception as e:
-        print(f"[ntfy] fout: {e}")
+    except Exception:
+        pass
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
