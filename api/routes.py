@@ -9,7 +9,7 @@ load_dotenv()
 from api.models import QuotationRequest
 from systems.quote_calculator import calculate_quote
 from systems.moneybird import create_and_send_estimate
-from systems.mail_sender import send_notification_email
+
 
 NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
 
@@ -68,11 +68,6 @@ async def create_quotation(request: QuotationRequest):
             ),
         )
 
-        send_notification_email(
-            event_data=event_data,
-            contact_info=contact_info,
-            moneybird_url=moneybird_result.get("estimate_url", ""),
-        )
 
         return {
             "status":      "success",
