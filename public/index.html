@@ -746,8 +746,12 @@
                 height: 100dvh;
             }
 
+            /* Logo kleiner en uit de flow houden, genoeg ruimte boven content */
             #wizardLogo {
-                right: 16px !important;
+                right: 12px !important;
+                top: 10px !important;
+                height: 26px !important;
+                width: 26px !important;
             }
 
             .wizard-sidebar {
@@ -812,17 +816,19 @@
                 margin: 8px 0;
             }
 
+            /* Genoeg ruimte boven zodat content niet onder logo valt */
             .wizard-main {
-                padding: 20px 16px 16px;
+                padding: 48px 16px 16px;
             }
 
             #step1-wrapper {
-                padding: 24px 16px 16px;
+                padding: 48px 16px 16px;
                 max-width: 100%;
             }
 
             .step1-title {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
+                padding-right: 36px; /* ruimte voor logo */
             }
 
             .location-cards {
