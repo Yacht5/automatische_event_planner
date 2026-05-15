@@ -54,32 +54,32 @@ def test_ntfy():
 
 @router.post("/quotation")
 async def create_quotation(request: QuotationRequest):
+    # Notificatie als allereerste — onafhankelijk van wat er daarna misgaat
+    contact_info = {
+        "name":    request.contact.name,
+        "email":   request.contact.email,
+        "phone":   request.contact.phone,
+        "company": request.contact.company or "",
+        "address": request.contact.address or "",
+        "zipcode": request.contact.zipcode or "",
+        "city":    request.contact.city or "",
+        "country": request.contact.country or "NL",
+    }
+    event_data = request.dict()
+    catering_str = ", ".join(event_data.get("catering", [])) or "—"
+    _send_ntfy(
+        title=f"Nieuwe aanvraag — {contact_info['name']}",
+        message=(
+            f"{event_data.get('date', '—')} | {event_data.get('timing', '—')} | "
+            f"{event_data.get('guests', '—')} gasten\n"
+            f"{event_data.get('location', '—')}\n"
+            f"{catering_str}\n"
+            f"{contact_info.get('email', '')} | {contact_info.get('phone', '')}"
+        ),
+    )
+
     try:
-        event_data  = request.dict()
         calculation = calculate_quote(event_data)
-
-        contact_info = {
-            "name":    request.contact.name,
-            "email":   request.contact.email,
-            "phone":   request.contact.phone,
-            "company": request.contact.company or "",
-            "address": request.contact.address or "",
-            "zipcode": request.contact.zipcode or "",
-            "city":    request.contact.city or "",
-            "country": request.contact.country or "NL",
-        }
-
-        catering_str = ", ".join(event_data.get("catering", [])) or "—"
-        _send_ntfy(
-            title=f"Nieuwe aanvraag — {contact_info['name']}",
-            message=(
-                f"{event_data.get('date', '—')} | {event_data.get('timing', '—')} | "
-                f"{event_data.get('guests', '—')} gasten\n"
-                f"{event_data.get('location', '—')}\n"
-                f"{catering_str}\n"
-                f"{contact_info.get('email', '')} | {contact_info.get('phone', '')}"
-            ),
-        )
 
         moneybird_result = create_and_send_estimate(
             calculation=calculation,
