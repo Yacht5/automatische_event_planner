@@ -15,16 +15,19 @@ NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
 
 def _send_ntfy(title: str, message: str):
     if not NTFY_TOPIC:
+        logger.warning("NTFY_TOPIC niet ingesteld, notificatie overgeslagen")
         return
     try:
-        _requests.post(
+        logger.info("ntfy versturen naar topic: %s", NTFY_TOPIC)
+        resp = _requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode("utf-8"),
             headers={"Title": title, "Priority": "high", "Tags": "bell"},
             timeout=5,
         )
-    except Exception:
-        pass
+        logger.info("ntfy response: %s %s", resp.status_code, resp.text[:100])
+    except Exception as e:
+        logger.error("ntfy fout: %s", e)
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
