@@ -33,6 +33,25 @@ router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
 
 
+@router.get("/test-ntfy")
+def test_ntfy():
+    topic = os.getenv("NTFY_TOPIC", "")
+    result = {"topic_in_env": topic or "(leeg)"}
+    if topic:
+        try:
+            resp = _requests.post(
+                f"https://ntfy.sh/{topic}",
+                data="Test van Vercel".encode("utf-8"),
+                headers={"Title": "Vercel test", "Priority": "high"},
+                timeout=5,
+            )
+            result["ntfy_status"] = resp.status_code
+            result["ntfy_response"] = resp.text[:200]
+        except Exception as e:
+            result["ntfy_error"] = str(e)
+    return result
+
+
 @router.post("/quotation")
 async def create_quotation(request: QuotationRequest):
     try:
