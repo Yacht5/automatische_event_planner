@@ -14,20 +14,20 @@ from systems.mail_sender import send_notification_email
 NTFY_TOPIC = os.getenv("NTFY_TOPIC", "")
 
 def _send_ntfy(title: str, message: str):
+    print(f"[ntfy] topic='{NTFY_TOPIC}'")
     if not NTFY_TOPIC:
-        logger.warning("NTFY_TOPIC niet ingesteld, notificatie overgeslagen")
+        print("[ntfy] NTFY_TOPIC niet ingesteld, overgeslagen")
         return
     try:
-        logger.info("ntfy versturen naar topic: %s", NTFY_TOPIC)
         resp = _requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
             data=message.encode("utf-8"),
             headers={"Title": title, "Priority": "high", "Tags": "bell"},
             timeout=5,
         )
-        logger.info("ntfy response: %s %s", resp.status_code, resp.text[:100])
+        print(f"[ntfy] response: {resp.status_code} {resp.text[:100]}")
     except Exception as e:
-        logger.error("ntfy fout: %s", e)
+        print(f"[ntfy] fout: {e}")
 
 router = APIRouter(prefix="/api")
 logger = logging.getLogger(__name__)
