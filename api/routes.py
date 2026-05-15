@@ -1,5 +1,6 @@
 import logging
 import os
+import httpx
 import requests as _requests
 from fastapi import APIRouter, HTTPException
 from dotenv import load_dotenv
@@ -16,11 +17,11 @@ def _send_ntfy(title: str, message: str):
     if not topic:
         return
     try:
-        _requests.post(
+        httpx.post(
             f"https://ntfy.sh/{topic}",
-            data=message.encode("utf-8"),
+            content=message.encode("utf-8"),
             headers={"Title": title, "Priority": "high", "Tags": "bell"},
-            timeout=5,
+            timeout=8,
         )
     except Exception:
         pass
