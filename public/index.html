@@ -899,6 +899,9 @@
     <!-- CLOSE BUTTON -->
     <button class="close-btn" onclick="closeWizard()">&#x2715;</button>
 
+    <!-- LOGO -->
+    <img src="/images/logo_yacht5.jpeg" alt="Yacht 5" style="position:absolute;top:12px;left:16px;height:32px;width:32px;object-fit:contain;opacity:0.85;z-index:10;border-radius:50%;">
+
     <!-- STEP 1: Intro + basis -->
     <div class="step active" id="step1" style="flex:1; overflow:hidden; flex-direction:column;">
         <div id="step1-wrapper">
@@ -1600,7 +1603,7 @@
             <div class="summary-item"><span class="icon">📅</span> ${dateStr}</div>
             ${itemsHTML ? `<hr class="summary-divider">${itemsHTML}` : ''}
             ${totalsHTML}
-            <div class="sidebar-footer" style="margin-top:auto; padding-top:16px;">Powered by Yacht 5</div>
+            <div class="sidebar-footer" style="margin-top:auto; padding-top:16px;">Powered by <a href="https://www.inovisionn.com/" target="_blank" style="color:inherit;text-decoration:none;">Inovisionn</a></div>
         `;
     }
 
