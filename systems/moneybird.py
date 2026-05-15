@@ -204,10 +204,10 @@ def send_estimate(estimate_id: str, email: str = "", name: str = "") -> dict:
     """Verstuur de offerte via Moneybird naar het e-mailadres van het contact."""
     payload = {
         "estimate_email": {
-            "send_method":        "email",
-            "email":              email,
-            "email_message":      f"Beste {name},\n\nHierbij ontvangt u de offerte van Yacht 5.\n\nMet vriendelijke groet,\nTeam Yacht 5",
-            "subject":            "Uw offerte van Yacht 5",
+            "delivery_method": "email",
+            "email":           email,
+            "message":         f"Beste {name},\n\nHierbij ontvangt u de offerte van Yacht 5.\n\nMet vriendelijke groet,\nTeam Yacht 5",
+            "subject":         "Uw offerte van Yacht 5",
         }
     }
     result = requests.patch(
@@ -216,6 +216,8 @@ def send_estimate(estimate_id: str, email: str = "", name: str = "") -> dict:
         headers=HEADERS,
         timeout=15,
     )
+    if not result.ok:
+        raise Exception(f"Moneybird {result.status_code}: {result.text}")
     result.raise_for_status()
     return {
         "note": "Offerte verstuurd via Moneybird.",
