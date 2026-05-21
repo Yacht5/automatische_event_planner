@@ -57,47 +57,113 @@ Zwarte Pad 58, Scheveningen
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def send_notification_email(event_data: dict, contact_info: dict, moneybird_url: str = ""):
-    """Stuurt een notificatie naar events@yacht5.nl bij een nieuwe aanvraag."""
+LANGUAGE_LABELS = {"NL": "Nederlands", "DE": "Duits", "EN": "Engels"}
+
+def send_notification_email(event_data: dict, contact_info: dict, calculation: dict = None, moneybird_url: str = ""):
+    """Stuurt een volledige notificatie naar yacht5@events.nl bij een nieuwe aanvraag."""
     if not GMAIL_USER or not GMAIL_APP_PASSWORD:
         return {"status": "error", "message": "Gmail credentials missing in .env"}
 
+    c = contact_info
+    name = c.get('name', '—')
+    date = event_data.get('date', '—')
+
     msg = EmailMessage()
-    msg['Subject'] = f"Nieuwe event aanvraag — {contact_info.get('name', '')} ({event_data.get('date', '')})"
+    msg['Subject'] = f"Nieuwe aanvraag — {name} | {date}"
     msg['From'] = f"Yacht 5 Event Planner <{GMAIL_USER}>"
-    msg['To'] = "events@yacht5.nl"
+    msg['To'] = "yacht5@events.nl"
 
     catering = event_data.get('catering', [])
-    catering_str = ', '.join(catering) if catering else '—'
 
-    body = f"""Nieuwe aanvraag binnengekomen via de event planner.
+    # Splits catering in prijs-items en op-aanvraag items op basis van calculation
+    priced_items = []
+    on_request_items = []
+    if calculation:
+        for item in calculation.get('itemized', []):
+            if item.get('on_request'):
+                on_request_items.append(item['name'])
+            else:
+                priced_items.append(
+                    f"  {item['name']:<35} {item['quantity']} x €{item['unit_price']:.2f} = €{item['total']:.2f}"
+                )
+        on_request_items += calculation.get('on_request', [])
+    else:
+        priced_items = [f"  {i}" for i in catering]
 
-CONTACT
-Naam:        {contact_info.get('name', '—')}
-E-mail:      {contact_info.get('email', '—')}
-Telefoon:    {contact_info.get('phone', '—')}
-Bedrijf:     {contact_info.get('company', '—')}
+    totals = calculation.get('totals', {}) if calculation else {}
 
-EVENT
-Datum:       {event_data.get('date', '—')}
-Tijden:      {event_data.get('timing', '—')}
-Gasten:      {event_data.get('guests', '—')}
-Categorie:   {event_data.get('category', '—')}
-Locatie:     {event_data.get('location', '—')}
-Catering:    {catering_str}
+    taal = LANGUAGE_LABELS.get(c.get('language', 'NL'), c.get('language', '—'))
+    land = c.get('country', '—')
+    adres_parts = [c.get('address',''), c.get('zipcode',''), c.get('city','')]
+    adres = ', '.join(p for p in adres_parts if p) or '—'
 
-Omschrijving:
-{event_data.get('description', '—')}
+    body_parts = [
+        "=" * 55,
+        "  NIEUWE EVENT AANVRAAG — YACHT 5",
+        "=" * 55,
+        "",
+        "── CONTACTGEGEVENS ──────────────────────────────────",
+        f"  Naam:        {name}",
+        f"  E-mail:      {c.get('email', '—')}",
+        f"  Telefoon:    {c.get('phone', '—')}",
+        f"  Bedrijf:     {c.get('company') or '—'}",
+        f"  Adres:       {adres}",
+        f"  Land:        {land}",
+        f"  Taal:        {taal}",
+        "",
+        "── EVENTGEGEVENS ────────────────────────────────────",
+        f"  Categorie:   {event_data.get('category', '—')}",
+        f"  Datum:       {date}",
+        f"  Tijden:      {event_data.get('timing') or '—'}",
+        f"  Gasten:      {event_data.get('guests', '—')}",
+        f"  Locatie:     {event_data.get('location', '—')}",
+        f"  Eventnaam:   {event_data.get('event_name') or '—'}",
+        f"  Groepsnaam:  {event_data.get('group_name') or '—'}",
+        "",
+        "── GESELECTEERDE OPTIES ─────────────────────────────",
+    ]
 
-Programma:
-{event_data.get('program', '—')}
+    if priced_items:
+        body_parts += priced_items
+    else:
+        body_parts.append("  —")
 
-Vragen:
-{event_data.get('questions', '—')}
+    if on_request_items:
+        body_parts.append("")
+        body_parts.append("  Op aanvraag: " + ", ".join(on_request_items))
 
-{f'Moneybird offerte: {moneybird_url}' if moneybird_url else ''}
-"""
-    msg.set_content(body)
+    if totals:
+        body_parts += [
+            "",
+            "── PRIJSINDICATIE ───────────────────────────────────",
+            f"  Subtotaal:   €{totals.get('subtotal', 0):.2f}",
+            f"  BTW (21%):   €{totals.get('vat_amount', 0):.2f}",
+            f"  Totaal:      €{totals.get('total', 0):.2f}",
+        ]
+
+    body_parts += [
+        "",
+        "── AANVULLENDE INFORMATIE ───────────────────────────",
+        f"  Omschrijving:",
+        f"  {event_data.get('description') or '—'}",
+        "",
+        f"  Programma:",
+        f"  {event_data.get('program') or '—'}",
+        "",
+        f"  Vragen / opmerkingen:",
+        f"  {event_data.get('questions') or '—'}",
+    ]
+
+    if moneybird_url:
+        body_parts += [
+            "",
+            "── MONEYBIRD ─────────────────────────────────────────",
+            f"  {moneybird_url}",
+        ]
+
+    body_parts += ["", "=" * 55]
+
+    msg.set_content("\n".join(body_parts))
 
     context = ssl.create_default_context()
     try:

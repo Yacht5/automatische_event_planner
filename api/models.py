@@ -11,6 +11,7 @@ class ContactInfo(BaseModel):
     zipcode: Optional[str] = ""
     city: Optional[str] = ""
     country: Optional[str] = "NL"
+    language: Optional[str] = "NL"
 
 
 class QuotationRequest(BaseModel):

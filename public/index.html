@@ -1093,7 +1093,7 @@
                         <div class="catering-add">✓</div>
                     </div>
                     <div class="catering-card" onclick="toggleCatering(this, 'Borrelbites')">
-                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-img-placeholder"><img src="/images/DSC00486.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
                         <div class="catering-body">
                             <div class="catering-name-row">
                                 <span class="catering-label">Borrelbites</span>
@@ -1240,7 +1240,7 @@
                         <div class="ent-badge">Op aanvraag</div>
                     </div>
                     <div class="ent-card" onclick="toggleEntertainment(this, 'Cocktailworkshop')">
-                        <div class="ent-img"></div>
+                        <div class="ent-img"><img src="/images/DSC00437.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
                         <div class="ent-check">✓</div>
                         <div class="ent-label">Cocktailworkshop</div>
                         <div class="ent-desc">Maak je eigen cocktail onder begeleiding</div>
@@ -1321,6 +1321,13 @@
                 </div>
                 <div class="form-group">
                     <input type="tel" id="contact_phone" placeholder="Telefoonnummer *">
+                </div>
+                <div class="form-group">
+                    <select id="contact_language" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;">
+                        <option value="NL" selected>🇳🇱 Nederlands</option>
+                        <option value="DE">🇩🇪 Duits</option>
+                        <option value="EN">🇬🇧 Engels</option>
+                    </select>
                 </div>
 
                 <div class="section-label">Adresgegevens</div>
@@ -1779,7 +1786,8 @@
                 address: document.getElementById('address').value,
                 zipcode: document.getElementById('zipcode').value,
                 city:    document.getElementById('city').value,
-                country: document.getElementById('country').value,
+                country:  document.getElementById('country').value,
+                language: document.getElementById('contact_language').value,
             },
             description: document.getElementById('description').value,
             timing:      timesUnknown() ? 'Nog onbekend' : `${document.getElementById('start_time').value} – ${document.getElementById('end_time').value}`,
@@ -1861,6 +1869,15 @@
     updateCompanyField();
     updateOverigeDranken();
     initSliders();
+
+    // Zet category op basis van URL-parameter ?type=particulier of ?type=zakelijk
+    const urlType = new URLSearchParams(window.location.search).get('type');
+    if (urlType) {
+        const cat = document.getElementById('category');
+        if (urlType.toLowerCase() === 'particulier') cat.value = 'Particulier';
+        if (urlType.toLowerCase() === 'zakelijk')    cat.value = 'Zakelijk';
+        updateCompanyField();
+    }
 </script>
 
 </body>
