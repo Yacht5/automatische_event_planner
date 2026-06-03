@@ -7,77 +7,82 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_USER = os.getenv("GMAIL_USER")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+SMTP_HOST     = os.getenv("SMTP_HOST", "smtp.transip.email")
+SMTP_PORT     = int(os.getenv("SMTP_PORT", "465"))
+SMTP_USER     = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
+NOTIFICATION_RECIPIENT = "yacht5@events.nl"
+
+
+def _smtp_connection():
+    context = ssl.create_default_context()
+    server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context)
+    server.login(SMTP_USER, SMTP_PASSWORD)
+    return server
+
 
 def send_quote_email(recipient_info, pdf_path):
-    """
-    Sends the Beachclub WOW quotation PDF to the client via Gmail.
-    """
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
-        return {"status": "error", "message": "Gmail credentials missing in .env"}
+    """Stuurt de offerte-PDF naar de klant via TransIP SMTP."""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        return {"status": "error", "message": "SMTP credentials missing in .env"}
 
     recipient_email = recipient_info.get("email")
-    recipient_name = recipient_info.get("name", "Gewaardeerde Klant")
+    recipient_name  = recipient_info.get("name", "Gewaardeerde Klant")
 
     msg = EmailMessage()
-    msg['Subject'] = "Uw persoonlijke offerte van Beachclub WOW"
-    msg['From'] = f"Beachclub WOW <{GMAIL_USER}>"
-    msg['To'] = recipient_email
-    
+    msg['Subject'] = "Uw persoonlijke offerte van Yacht 5"
+    msg['From']    = f"Yacht 5 <{SMTP_USER}>"
+    msg['To']      = recipient_email
+
     body = f"""Beste {recipient_name},
 
-Bedankt voor uw interesse in het vieren van uw event bij Beachclub WOW!
+Bedankt voor uw interesse in het vieren van uw event bij Yacht 5!
 
-Op basis van uw aanvraag hebben wij een eerste prijsindicatie voor u gegenereerd. U vindt deze in de bijlage van deze email.
+Op basis van uw aanvraag hebben wij een eerste prijsindicatie voor u gegenereerd. U vindt deze in de bijlage van deze e-mail.
 
 Wij nemen binnenkort persoonlijk contact met u op om de details te bespreken en een definitieve offerte op te stellen.
 
-Met zonnige groet,
+Met vriendelijke groet,
 
-Het team van Beachclub WOW
-Zwarte Pad 58, Scheveningen
+Het team van Yacht 5
 """
     msg.set_content(body)
 
-    # Add PDF Attachment
     if pdf_path and os.path.exists(pdf_path):
         with open(pdf_path, 'rb') as f:
-            file_data = f.read()
-            file_name = os.path.basename(pdf_path)
-            msg.add_attachment(file_data, maintype='application', subtype='pdf', filename=file_name)
-
-    context = ssl.create_default_context()
+            msg.add_attachment(f.read(), maintype='application', subtype='pdf',
+                               filename=os.path.basename(pdf_path))
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+        with _smtp_connection() as server:
             server.send_message(msg)
         return {"status": "success", "message": f"Offerte verzonden naar {recipient_email}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+
 LANGUAGE_LABELS = {"NL": "Nederlands", "DE": "Duits", "EN": "Engels"}
+
 
 def send_notification_email(event_data: dict, contact_info: dict, calculation: dict = None, moneybird_url: str = ""):
     """Stuurt een volledige notificatie naar yacht5@events.nl bij een nieuwe aanvraag."""
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
-        return {"status": "error", "message": "Gmail credentials missing in .env"}
+    if not SMTP_USER or not SMTP_PASSWORD:
+        return {"status": "error", "message": "SMTP credentials missing in .env"}
 
-    c = contact_info
+    c    = contact_info
     name = c.get('name', '—')
     date = event_data.get('date', '—')
 
     msg = EmailMessage()
     msg['Subject'] = f"Nieuwe aanvraag — {name} | {date}"
-    msg['From'] = f"Yacht 5 Event Planner <{GMAIL_USER}>"
-    msg['To'] = "yacht5@events.nl"
+    msg['From']    = f"Yacht 5 Event Planner <{SMTP_USER}>"
+    msg['To']      = NOTIFICATION_RECIPIENT
 
-    catering = event_data.get('catering', [])
-
-    # Splits catering in prijs-items en op-aanvraag items op basis van calculation
-    priced_items = []
+    catering         = event_data.get('catering', [])
+    priced_items     = []
     on_request_items = []
+
     if calculation:
         for item in calculation.get('itemized', []):
             if item.get('on_request'):
@@ -91,11 +96,9 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
         priced_items = [f"  {i}" for i in catering]
 
     totals = calculation.get('totals', {}) if calculation else {}
-
-    taal = LANGUAGE_LABELS.get(c.get('language', 'NL'), c.get('language', '—'))
-    land = c.get('country', '—')
-    adres_parts = [c.get('address',''), c.get('zipcode',''), c.get('city','')]
-    adres = ', '.join(p for p in adres_parts if p) or '—'
+    taal   = LANGUAGE_LABELS.get(c.get('language', 'NL'), c.get('language', '—'))
+    land   = c.get('country', '—')
+    adres  = ', '.join(p for p in [c.get('address',''), c.get('zipcode',''), c.get('city','')] if p) or '—'
 
     body_parts = [
         "=" * 55,
@@ -123,14 +126,10 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
         "── GESELECTEERDE OPTIES ─────────────────────────────",
     ]
 
-    if priced_items:
-        body_parts += priced_items
-    else:
-        body_parts.append("  —")
+    body_parts += priced_items if priced_items else ["  —"]
 
     if on_request_items:
-        body_parts.append("")
-        body_parts.append("  Op aanvraag: " + ", ".join(on_request_items))
+        body_parts += ["", "  Op aanvraag: " + ", ".join(on_request_items)]
 
     if totals:
         body_parts += [
@@ -144,13 +143,13 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
     body_parts += [
         "",
         "── AANVULLENDE INFORMATIE ───────────────────────────",
-        f"  Omschrijving:",
+        "  Omschrijving:",
         f"  {event_data.get('description') or '—'}",
         "",
-        f"  Programma:",
+        "  Programma:",
         f"  {event_data.get('program') or '—'}",
         "",
-        f"  Vragen / opmerkingen:",
+        "  Vragen / opmerkingen:",
         f"  {event_data.get('questions') or '—'}",
     ]
 
@@ -165,10 +164,8 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
 
     msg.set_content("\n".join(body_parts))
 
-    context = ssl.create_default_context()
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+        with _smtp_connection() as server:
             server.send_message(msg)
         return {"status": "success"}
     except Exception as e:
@@ -176,7 +173,6 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
 
 
 if __name__ == "__main__":
-    # Test call
     import sys
     if len(sys.argv) > 1:
         try:
