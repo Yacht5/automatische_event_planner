@@ -969,27 +969,27 @@
                 <div class="step-title">Welke ruimte/ruimtes heeft uw voorkeur?</div>
                 <p class="step-subtitle">Selecteer één of meerdere ruimtes voor uw evenement.</p>
                 <div class="location-cards" id="locationCards">
-                    <div class="location-card" onclick="selectLocation(this, 'Bovenruimte tot 70 pax', 800)">
+                    <div class="location-card" onclick="selectLocation(this, 'Bovenruimte met terras 70 pax', 800)">
                         <div class="location-card-img img-slider">
                             <img src="/images/Foto_bovenruimte01.jpg" class="slider-img active"><img src="/images/Foto_bovenruimte02.jpg" class="slider-img"><img src="/images/Foto_bovenruimte03.jpg" class="slider-img">
                             <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
                         </div>
                         <div class="location-card-body">
                             <div>
-                                <div class="location-card-name">Bovenruimte tot <strong>70 pax</strong></div>
+                                <div class="location-card-name">Bovenruimte met terras <strong>70 pax</strong></div>
                                 <div class="location-card-price">€800</div>
                             </div>
                             <div class="location-card-check">✓</div>
                         </div>
                     </div>
-                    <div class="location-card" onclick="selectLocation(this, 'Bovenruimte 70+ pax', 1000)">
+                    <div class="location-card" onclick="selectLocation(this, 'Hele bovenruimte 70+ pax', 1000)">
                         <div class="location-card-img img-slider">
                             <img src="/images/Foto_bovenruimte02.jpg" class="slider-img active"><img src="/images/Foto_bovenruimte03.jpg" class="slider-img"><img src="/images/Foto_bovenruimte01.jpg" class="slider-img">
                             <div class="slider-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
                         </div>
                         <div class="location-card-body">
                             <div>
-                                <div class="location-card-name">Bovenruimte <strong>70+ pax</strong></div>
+                                <div class="location-card-name">Hele bovenruimte <strong>70+ pax</strong></div>
                                 <div class="location-card-price">€1.000</div>
                             </div>
                             <div class="location-card-check">✓</div>
@@ -1100,6 +1100,17 @@
                                 <span class="catering-price">€5,50 p.p.</span>
                             </div>
                             <div class="catering-desc">Mixed snacks uit onze kaart</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" onclick="toggleCatering(this, 'Borrelplank')">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Borrelplank</span>
+                                <span class="catering-price">Op aanvraag</span>
+                            </div>
+                            <div class="catering-desc">Kaas, vleeswaren & meer</div>
                         </div>
                         <div class="catering-add">✓</div>
                     </div>
@@ -1232,12 +1243,12 @@
                 <!-- ENTERTAINMENT -->
                 <div class="catering-section-label">Entertainment &amp; invulling</div>
                 <div class="ent-grid">
-                    <div class="ent-card" onclick="toggleEntertainment(this, 'Bierproeverij')">
+                    <div class="ent-card" id="bierproeverijCard" onclick="toggleBierproeverij(this)" style="opacity:0.4;cursor:not-allowed;">
                         <div class="ent-img"><img src="/images/Bierproeverij.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
                         <div class="ent-check">✓</div>
                         <div class="ent-label">Bierproeverij</div>
                         <div class="ent-desc">Proef een selectie ambachtelijke bieren</div>
-                        <div class="ent-badge">Op aanvraag</div>
+                        <div class="ent-badge" id="bierproeverijBadge">Kies eerst een drankarrangement</div>
                     </div>
                     <div class="ent-card" onclick="toggleEntertainment(this, 'Cocktailworkshop')">
                         <div class="ent-img"><img src="/images/DSC00437.jpg" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
@@ -1410,6 +1421,7 @@
         'Lunch 2-gangen':         { price: 37.50 },
         'Lunch 3-gangen':         { price: 45.50 },
         'Borrelbites':            { price:  5.50 },
+        'Borrelplank':            { price: null  },
         'Fingerfoods':            { price: 10.95 },
         'Walking Dinner 4-gangen':{ price: 39.50 },
         'Walking Dinner 5-gangen':{ price: 47.00 },
@@ -1495,7 +1507,13 @@
             const start  = document.getElementById('start_time').value;
             const end    = document.getElementById('end_time').value;
             const err    = document.getElementById('step1-error');
-            if (!guests || parseInt(guests) < 1 || !date || (!timesUnknown() && (!start || !end))) {
+            if (!guests || parseInt(guests) < 1 || !date) {
+                err.textContent = 'Vul een datum en aantal gasten in om verder te gaan.';
+                err.style.display = 'block';
+                return;
+            }
+            if (!timesUnknown() && (!start || !end)) {
+                err.textContent = 'Vul een begin- en eindtijd in, of vink "Tijden nog onbekend" aan.';
                 err.style.display = 'block';
                 return;
             }
@@ -1624,6 +1642,32 @@
         toggleCatering(card, value);
     }
 
+    function toggleBierproeverij(card) {
+        if (!selectedDrinkKey) return;
+        toggleEntertainment(card, 'Bierproeverij');
+    }
+
+    function updateBierproeverijState() {
+        const card  = document.getElementById('bierproeverijCard');
+        const badge = document.getElementById('bierproeverijBadge');
+        if (!card) return;
+        if (selectedDrinkKey) {
+            card.style.opacity = '1';
+            card.style.cursor  = 'pointer';
+            badge.textContent  = 'Op aanvraag';
+        } else {
+            card.style.opacity = '0.4';
+            card.style.cursor  = 'not-allowed';
+            badge.textContent  = 'Kies eerst een drankarrangement';
+            if (selectedCatering.has('Bierproeverij')) {
+                selectedCatering.delete('Bierproeverij');
+                card.classList.remove('selected');
+                syncCateringValue();
+                updateSidebars();
+            }
+        }
+    }
+
     function selectDrinkArrangement(btn, hours) {
         document.querySelectorAll('.drink-hour-btn').forEach(b => b.classList.remove('selected'));
         if (selectedDrinkKey === hours) {
@@ -1635,6 +1679,7 @@
         syncCateringValue();
         updateSidebars();
         updateDrinkTimingHint();
+        updateBierproeverijState();
     }
 
     function syncCateringValue() {
