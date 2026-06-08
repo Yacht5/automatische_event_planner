@@ -12,7 +12,7 @@ SMTP_PORT     = int(os.getenv("SMTP_PORT", "465"))
 SMTP_USER     = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
-NOTIFICATION_RECIPIENT = "yacht5@events.nl"
+NOTIFICATION_RECIPIENT = "events@yacht5.nl"
 
 
 def _smtp_connection():
