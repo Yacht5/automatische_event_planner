@@ -128,7 +128,7 @@ def get_or_create_contact(contact: dict) -> str:
 
 # ── OFFERTE AANMAKEN ──────────────────────────────────────────────────────────
 
-def create_estimate(contact_id: str, calculation: dict, event_data: dict) -> dict:
+def create_estimate(contact_id: str, calculation: dict, event_data: dict, contact_info: dict = None) -> dict:
     """
     Maak een offerte aan in Moneybird op basis van de berekende quote.
 
@@ -185,6 +185,18 @@ def create_estimate(contact_id: str, calculation: dict, event_data: dict) -> dic
         }
     }
 
+    # Bepaal workflow_id op basis van taal
+    if contact_info:
+        language = str(contact_info.get("language", "NL")).upper()
+        if language == "EN":
+            workflow_id = os.getenv("MONEYBIRD_WORKFLOW_ID_EN", "488287117251708393")
+        elif language == "DE" or language == "DU":
+            workflow_id = os.getenv("MONEYBIRD_WORKFLOW_ID_DE", "488285858919613949")
+        else:
+            workflow_id = os.getenv("MONEYBIRD_WORKFLOW_ID_NL", "488269925198071017")
+        
+        payload["estimate"]["workflow_id"] = workflow_id
+
     estimate = _post("estimates", payload)
 
     # Zet state naar open zodat de offerte verstuurd kan worden
@@ -200,14 +212,13 @@ def create_estimate(contact_id: str, calculation: dict, event_data: dict) -> dic
 
 # ── OFFERTE VERSTUREN ─────────────────────────────────────────────────────────
 
-def send_estimate(estimate_id: str, email: str = "", name: str = "") -> dict:
-    """Verstuur de offerte via Moneybird naar het e-mailadres van het contact."""
+def send_estimate(estimate_id: str, email: str = "") -> dict:
+    """Verstuur de offerte via Moneybird naar het e-mailadres van het contact.
+    Bericht en onderwerp worden overgenomen uit de geselecteerde Moneybird workflow."""
     payload = {
         "estimate_email": {
             "delivery_method": "email",
             "email":           email,
-            "message":         f"Beste {name},\n\nHierbij ontvangt u de offerte van Yacht 5.\n\nMet vriendelijke groet,\nTeam Yacht 5",
-            "subject":         "Uw offerte van Yacht 5",
         }
     }
     result = requests.patch(
@@ -237,13 +248,12 @@ def create_and_send_estimate(calculation: dict, event_data: dict, contact_info: 
     Geeft een dict terug met estimate_id, reference en send_status.
     """
     contact_id = get_or_create_contact(contact_info)
-    estimate   = create_estimate(contact_id, calculation, event_data)
+    estimate   = create_estimate(contact_id, calculation, event_data, contact_info)
     estimate_id = estimate["id"]
 
     send_result = send_estimate(
         estimate_id,
         email=contact_info.get("email", ""),
-        name=contact_info.get("name", ""),
     )
 
     return {
