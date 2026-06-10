@@ -89,9 +89,9 @@ def calculate_quote(event_data: dict) -> dict:
         elif price_pp is None:
             catering_lookup[item] = {
                 "name":       item,
-                "quantity":   None,
-                "unit_price": None,
-                "total":      None,
+                "quantity":   1,
+                "unit_price": 0.0,
+                "total":      0.0,
                 "on_request": True,
             }
         else:
