@@ -182,6 +182,7 @@ def create_estimate(contact_id: str, calculation: dict, event_data: dict, contac
             "estimate_date":       event_data.get("date", ""),
             "details_attributes":  details,
             "notes":               "\n".join(note_lines),
+            "language":            contact_info.get("language", "NL").lower() if contact_info else "nl",
         }
     }
 
@@ -216,9 +217,9 @@ def send_estimate(estimate_id: str, email: str = "") -> dict:
     """Verstuur de offerte via Moneybird naar het e-mailadres van het contact.
     Bericht en onderwerp worden overgenomen uit de geselecteerde Moneybird workflow."""
     payload = {
-        "estimate_email": {
-            "delivery_method": "email",
-            "email":           email,
+        "estimate_sending": {
+            "delivery_method": "Email",
+            "email_address":   email,
         }
     }
     result = requests.patch(
