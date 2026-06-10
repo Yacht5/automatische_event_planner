@@ -88,8 +88,10 @@ def send_notification_email(event_data: dict, contact_info: dict, calculation: d
             if item.get('on_request'):
                 on_request_items.append(item['name'])
             else:
+                unit_price = item.get('unit_price') or 0.0
+                total      = item.get('total') or 0.0
                 priced_items.append(
-                    f"  {item['name']:<35} {item['quantity']} x €{item['unit_price']:.2f} = €{item['total']:.2f}"
+                    f"  {item['name']:<35} {item['quantity']} x €{unit_price:.2f} = €{total:.2f}"
                 )
         on_request_items += calculation.get('on_request', [])
     else:
