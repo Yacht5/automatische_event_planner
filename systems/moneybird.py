@@ -138,9 +138,10 @@ def create_estimate(contact_id: str, calculation: dict, event_data: dict, contac
 
     details = []
     for item in calculation.get("itemized", []):
+        unit_price = item.get("unit_price") or 0.0
         line = {
             "description": item["name"],
-            "price":       f"{item['unit_price']:.2f}",
+            "price":       f"{unit_price:.2f}",
             "amount":      str(item["quantity"]),
         }
         if tax_rate_id:

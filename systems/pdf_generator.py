@@ -79,10 +79,12 @@ def generate_pdf(data, output_path):
     
     for item in data['itemized']:
         pdf.set_fill_color(245, 245, 245)
+        unit_price = item.get("unit_price") or 0.0
+        total      = item.get("total") or 0.0
         pdf.cell(90, 8, f' {item["name"]}', border='LRB', fill=fill)
         pdf.cell(30, 8, f' {item["quantity"]}', border='LRB', fill=fill, align='C')
-        pdf.cell(35, 8, f' Eur {item["unit_price"]:.2f}', border='LRB', fill=fill, align='R')
-        pdf.cell(35, 8, f' Eur {item["total"]:.2f}', border='LRB', fill=fill, align='R')
+        pdf.cell(35, 8, f' Eur {unit_price:.2f}', border='LRB', fill=fill, align='R')
+        pdf.cell(35, 8, f' Eur {total:.2f}', border='LRB', fill=fill, align='R')
         pdf.ln()
         fill = not fill
 
@@ -91,18 +93,18 @@ def generate_pdf(data, output_path):
     # Summary
     pdf.set_font('helvetica', 'B', 10)
     pdf.cell(155, 8, 'Subtotaal', align='R')
-    pdf.cell(35, 8, f' Eur {data["totals"]["subtotal"]:.2f}', align='R')
+    pdf.cell(35, 8, f' Eur {data["totals"].get("subtotal") or 0.0:.2f}', align='R')
     pdf.ln()
     
     pdf.set_font('helvetica', '', 10)
     pdf.cell(155, 8, f'BTW ({data["totals"]["vat_rate"]})', align='R')
-    pdf.cell(35, 8, f' Eur {data["totals"]["vat_amount"]:.2f}', align='R')
+    pdf.cell(35, 8, f' Eur {data["totals"].get("vat_amount") or 0.0:.2f}', align='R')
     pdf.ln()
     
     pdf.set_font('helvetica', 'B', 12)
     pdf.set_text_color(210, 180, 140) # Sandy Beige for Total
     pdf.cell(155, 10, 'TOTAAL CPT.', align='R')
-    pdf.cell(35, 10, f' Eur {data["totals"]["total"]:.2f}', align='R')
+    pdf.cell(35, 10, f' Eur {data["totals"].get("total") or 0.0:.2f}', align='R')
 
     pdf.ln(20)
     
