@@ -1796,7 +1796,17 @@
     }
 
     // ── SUBMIT ────────────────────────────────────────────────────
+    let isSubmitting = false;
+
     async function submitForm() {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        const submitBtn = document.querySelector('.btn-submit');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Bezig met versturen...';
+
         const category = document.getElementById('category').value;
         const phone    = document.getElementById('contact_phone').value.trim();
         const desc     = document.getElementById('description').value.trim();
@@ -1811,6 +1821,9 @@
 
         if (errors.length > 0) {
             alert(errors.join('\n'));
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
             return;
         }
 
@@ -1850,6 +1863,9 @@
             if (!resp.ok) {
                 const err = await resp.json().catch(() => ({}));
                 alert('Er is iets misgegaan: ' + (err.detail || resp.status));
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
                 return;
             }
 
@@ -1860,6 +1876,9 @@
         } catch (err) {
             console.error('Fetch error:', err);
             alert('Verbindingsfout. Controleer of de server actief is.');
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
     }
 
