@@ -126,27 +126,109 @@ def get_or_create_contact(contact: dict) -> str:
     return contact_id
 
 
+# ── BTW MAPPING ──────────────────────────────────────────────────────────────
+
+# BTW-tarieven ophalen
+TAX_RATE_21 = None
+TAX_RATE_9  = None
+TAX_RATE_0  = None
+
+def _ensure_tax_rates():
+    global TAX_RATE_21, TAX_RATE_9, TAX_RATE_0
+    if TAX_RATE_21 is None:
+        TAX_RATE_21 = get_tax_rate_id("21")
+        TAX_RATE_9  = get_tax_rate_id("9")
+        TAX_RATE_0  = get_tax_rate_id("0")
+
+# Drankarrangement splits (HOOG=21%, LAAG=9%)
+DRINK_SPLITS = {
+    "Drankarrangement 2u": {"hoog": 19.10, "laag": 8.15},
+    "Drankarrangement 3u": {"hoog": 22.60, "laag": 9.65},
+    "Drankarrangement 4u": {"hoog": 26.10, "laag": 11.15},
+    "Drankarrangement 5u": {"hoog": 30.15, "laag": 12.10},
+    "Drankarrangement 6u": {"hoog": 33.10, "laag": 14.15},
+    "Drankarrangement 8u": {"hoog": 40.40, "laag": 17.35},
+}
+
+# Items die 9% BTW krijgen
+BTW_9_ITEMS = {
+    "Sandwich & Soup", "Lunch 2-gangen", "Lunch 3-gangen",
+    "Borrelbites", "Borrelplank", "Fingerfoods",
+    "Walking Dinner 4-gangen", "Walking Dinner 5-gangen",
+    "Barbecue", "Buffet", "2 gangen diner", "3 gangen diner", "4 gangen diner"
+}
+
+# Items die 0% BTW krijgen (zaalhuur)
+BTW_0_ITEMS = {
+    "Bovenruimte met terras 70 pax", "Hele bovenruimte 70+ pax",
+    "Benedenverdieping + hele terras", "Het hele pand"
+}
+
+def get_tax_rate_for_item(item_name: str) -> str:
+    """Bepaal het juiste BTW-tarief ID voor een item."""
+    _ensure_tax_rates()
+
+    # Check zaalhuur (0%)
+    if any(loc in item_name for loc in BTW_0_ITEMS):
+        return TAX_RATE_0
+
+    # Check eten (9%)
+    if item_name in BTW_9_ITEMS:
+        return TAX_RATE_9
+
+    # Default: 21% (alcohol, diensten, entertainment)
+    return TAX_RATE_21
+
+
 # ── OFFERTE AANMAKEN ──────────────────────────────────────────────────────────
 
 def create_estimate(contact_id: str, calculation: dict, event_data: dict, contact_info: dict = None) -> dict:
     """
     Maak een offerte aan in Moneybird op basis van de berekende quote.
+    Drankarrangementen worden automatisch gesplitst in HOOG (21%) en LAAG (9%).
 
     Geeft het aangemaakte offerte-object terug (inclusief estimate_id en reference).
     """
-    tax_rate_id = get_tax_rate_id("21")
+    _ensure_tax_rates()
 
     details = []
     for item in calculation.get("itemized", []):
-        unit_price = item.get("unit_price") or 0.0
-        line = {
-            "description": item["name"],
-            "price":       f"{unit_price:.2f}",
-            "amount":      str(item["quantity"]),
-        }
-        if tax_rate_id:
-            line["tax_rate_id"] = tax_rate_id
-        details.append(line)
+        item_name = item["name"]
+        quantity = item["quantity"]
+
+        # Check of dit een drankarrangement is dat gesplitst moet worden
+        is_drink = any(item_name.startswith(drink) for drink in DRINK_SPLITS.keys())
+
+        if is_drink:
+            # Splits drankarrangement in HOOG en LAAG
+            for base_name, prices in DRINK_SPLITS.items():
+                if item_name.startswith(base_name):
+                    # HOOG component (21%)
+                    details.append({
+                        "description": f"{base_name} BTW HOOG",
+                        "price":       f"{prices['hoog']:.2f}",
+                        "amount":      str(quantity),
+                        "tax_rate_id": TAX_RATE_21,
+                    })
+                    # LAAG component (9%)
+                    details.append({
+                        "description": f"{base_name} BTW LAAG",
+                        "price":       f"{prices['laag']:.2f}",
+                        "amount":      str(quantity),
+                        "tax_rate_id": TAX_RATE_9,
+                    })
+                    break
+        else:
+            # Regulier item met correct BTW-tarief
+            unit_price = item.get("unit_price") or 0.0
+            tax_id = get_tax_rate_for_item(item_name)
+
+            details.append({
+                "description": item_name,
+                "price":       f"{unit_price:.2f}",
+                "amount":      str(quantity),
+                "tax_rate_id": tax_id,
+            })
 
     # Op-aanvraag-items als informatieregel toevoegen
     on_request = calculation.get("on_request", [])
