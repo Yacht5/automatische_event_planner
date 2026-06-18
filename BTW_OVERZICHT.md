@@ -14,6 +14,8 @@
 | 5uur drankarrangement €42,25 BTW LAAG | €12,10 | 9% |
 | 6uur drankarrangement €47,25 BTW HOOG | €33,10 | 21% |
 | 6uur drankarrangement €47,25 BTW LAAG | €14,15 | 9% |
+| 7uur drankarrangement €52,50 BTW HOOG | €36,75 | 21% |
+| 7uur drankarrangement €52,50 BTW LAAG | €15,75 | 9% |
 | 8uur drankarrangement €57,75 BTW HOOG | €40,40 | 21% |
 | 8uur drankarrangement €57,75 BTW LAAG | €17,35 | 9% |
 

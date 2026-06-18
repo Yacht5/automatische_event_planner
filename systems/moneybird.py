@@ -147,6 +147,7 @@ DRINK_SPLITS = {
     "Drankarrangement 4u": {"hoog": 26.10, "laag": 11.15},
     "Drankarrangement 5u": {"hoog": 30.15, "laag": 12.10},
     "Drankarrangement 6u": {"hoog": 33.10, "laag": 14.15},
+    "Drankarrangement 7u": {"hoog": 36.75, "laag": 15.75},
     "Drankarrangement 8u": {"hoog": 40.40, "laag": 17.35},
 }
 
