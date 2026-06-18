@@ -18,6 +18,7 @@ CATERING_PRICES = {
     'Drankarrangement 4u':          37.25,
     'Drankarrangement 5u':          42.25,
     'Drankarrangement 6u':          47.25,
+    'Drankarrangement 8u':          57.75,
     'Na calculatie van dranken':    None,
     'Bierproeverij':                None,
     'Cocktailworkshop':             None,
@@ -129,7 +130,7 @@ def calculate_quote(event_data: dict) -> dict:
     # Volgorde: drank → eten → zaalhuur → acts (op aanvraag apart)
     DRINK_ITEMS = {'Welkomst bubbels', 'Drankarrangement 2u', 'Drankarrangement 3u',
                    'Drankarrangement 4u', 'Drankarrangement 5u', 'Drankarrangement 6u',
-                   'Na calculatie van dranken'}
+                   'Drankarrangement 8u', 'Na calculatie van dranken'}
     ACT_ITEMS   = {'Bierproeverij', 'Cocktailworkshop', 'Spreker', 'Live muziek', 'DJ', 'Unieke acts'}
 
     drink_lines = [e for e in itemized_catering if e["name"] in DRINK_ITEMS]
