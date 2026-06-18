@@ -43,13 +43,16 @@ def _post(endpoint: str, payload: dict) -> dict:
 def get_tax_rate_id(percentage: str = "21") -> str | None:
     """Haal het Moneybird-ID op voor het BTW-tarief (standaard 21%)."""
     tax_rates = _get("tax_rates")
+    # Moneybird geeft percentage als string ("21.0"), we converteren beide naar float voor vergelijking
     target_pct = float(percentage)
     for rate in tax_rates:
-        if rate.get("percentage") == target_pct and rate.get("tax_rate_type") == "sales_invoice":
+        rate_pct = float(rate.get("percentage", 0))
+        if rate_pct == target_pct and rate.get("tax_rate_type") == "sales_invoice":
             return rate["id"]
     # Fallback: eerste verkoop-tarief met dit percentage
     for rate in tax_rates:
-        if rate.get("percentage") == target_pct:
+        rate_pct = float(rate.get("percentage", 0))
+        if rate_pct == target_pct:
             return rate["id"]
     return None
 
