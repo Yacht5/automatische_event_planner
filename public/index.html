@@ -1164,6 +1164,17 @@
                         </div>
                         <div class="catering-add">✓</div>
                     </div>
+                    <div class="catering-card" id="buffetCard" onclick="toggleBuffet(this)" style="display:none;">
+                        <div class="catering-img-placeholder"></div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Buffet</span>
+                                <span class="catering-price">Op aanvraag</span>
+                            </div>
+                            <div class="catering-desc">Uitgebreid buffet voor grote groepen</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
                 </div>
 
                 <!-- DRINKS -->
@@ -1415,6 +1426,7 @@
         'Walking Dinner 4-gangen':{ price: 39.50 },
         'Walking Dinner 5-gangen':{ price: 47.00 },
         'Barbecue':               { price: 29.50 },
+        'Buffet':                 { price: null  },
         'Welkomst bubbels':       { price:  6.95 },
         'Na calculatie van dranken':        { price: null, nacalc: true },
         'Drankarrangement 2u':    { price: 27.25 },
@@ -1558,7 +1570,33 @@
             document.getElementById('location').value = value;
             selectedLocationPrice = price;
         }
+        updateBuffetVisibility();
         updateSidebars();
+    }
+
+    function updateBuffetVisibility() {
+        const buffetCard = document.getElementById('buffetCard');
+        const location = document.getElementById('location').value;
+        if (!buffetCard) return;
+
+        if (location === 'Het hele pand') {
+            buffetCard.style.display = '';
+        } else {
+            buffetCard.style.display = 'none';
+            // Verwijder buffet uit selectie als het niet meer beschikbaar is
+            if (selectedCatering.has('Buffet')) {
+                selectedCatering.delete('Buffet');
+                buffetCard.classList.remove('selected');
+                syncCateringValue();
+                updateSidebars();
+            }
+        }
+    }
+
+    function toggleBuffet(card) {
+        const location = document.getElementById('location').value;
+        if (location !== 'Het hele pand') return;
+        toggleCatering(card, 'Buffet');
     }
 
     // ── OVERIGE DRANKEN ───────────────────────────────────────────
