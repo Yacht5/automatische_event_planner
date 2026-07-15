@@ -1151,7 +1151,7 @@
                         </div>
                         <div class="catering-add">✓</div>
                     </div>
-                    <div class="catering-card" onclick="toggleCatering(this, 'Barbecue')">
+                    <div class="catering-card" id="bbqCard" onclick="toggleBBQ(this)">
                         <div class="catering-img-placeholder">
                             <img src="/images/BBQ02.jpg" style="width:100%;height:100%;object-fit:cover;">
                         </div>
@@ -1161,6 +1161,19 @@
                                 <span class="catering-price">€29,50 p.p.</span>
                             </div>
                             <div class="catering-desc">4 stukken vlees, saladebuffet, brood</div>
+                        </div>
+                        <div class="catering-add">✓</div>
+                    </div>
+                    <div class="catering-card" id="visBbqCard" onclick="toggleVisBBQ(this)">
+                        <div class="catering-img-placeholder">
+                            <img src="/images/BBQ02.jpg" style="width:100%;height:100%;object-fit:cover;">
+                        </div>
+                        <div class="catering-body">
+                            <div class="catering-name-row">
+                                <span class="catering-label">Vis Barbecue</span>
+                                <span class="catering-price">€32,50 p.p.</span>
+                            </div>
+                            <div class="catering-desc">Vis & zeevruchten van de grill, saladebuffet, brood</div>
                         </div>
                         <div class="catering-add">✓</div>
                     </div>
@@ -1609,6 +1622,27 @@
         const location = document.getElementById('location').value;
         if (location !== 'Het hele pand') return;
         toggleCatering(card, 'Buffet');
+    }
+
+    // ── BBQ & VIS BBQ (wederzijds exclusief) ─────────────────────
+    function toggleBBQ(card) {
+        // Deselecteer Vis BBQ als die geselecteerd is
+        const visBbqCard = document.getElementById('visBbqCard');
+        if (selectedCatering.has('Vis Barbecue')) {
+            selectedCatering.delete('Vis Barbecue');
+            visBbqCard.classList.remove('selected');
+        }
+        toggleCatering(card, 'Barbecue');
+    }
+
+    function toggleVisBBQ(card) {
+        // Deselecteer gewone BBQ als die geselecteerd is
+        const bbqCard = document.getElementById('bbqCard');
+        if (selectedCatering.has('Barbecue')) {
+            selectedCatering.delete('Barbecue');
+            bbqCard.classList.remove('selected');
+        }
+        toggleCatering(card, 'Vis Barbecue');
     }
 
     // ── OVERIGE DRANKEN ───────────────────────────────────────────
