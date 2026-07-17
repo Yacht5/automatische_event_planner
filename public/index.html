@@ -939,11 +939,13 @@
                 <div class="form-row">
                     <div class="form-group" style="margin:0">
                         <label>Begintijd <span style="color:var(--accent);">*</span></label>
-                        <input type="time" id="start_time">
+                        <input type="time" id="start_time" placeholder="bijv. 14:00" step="300"
+                               oninput="fixSafariTime(this)" onchange="fixSafariTime(this)">
                     </div>
                     <div class="form-group" style="margin:0">
                         <label>Eindtijd <span style="color:var(--accent);">*</span></label>
-                        <input type="time" id="end_time">
+                        <input type="time" id="end_time" placeholder="bijv. 18:00" step="300"
+                               oninput="fixSafariTime(this)" onchange="fixSafariTime(this)">
                     </div>
                 </div>
             </div>
@@ -1525,12 +1527,25 @@
         }
     }
 
+    // ── SAFARI TIME FIX ──────────────────────────────────────────
+    // Safari geeft soms een lege string terug voor <input type="time">.
+    // We slaan de ingetypte waarde op als data-attribuut als fallback.
+    function fixSafariTime(el) {
+        const v = el.value;
+        if (v) el.setAttribute('data-val', v);
+    }
+    function getSafariTimeValue(id) {
+        const el = document.getElementById(id);
+        return el.value || el.getAttribute('data-val') || '';
+    }
+
     function goTo(step) {
         if (currentStep === 1 && step > 1) {
             const guests = document.getElementById('guests').value;
             const date   = document.getElementById('date').value;
-            const start  = document.getElementById('start_time').value;
-            const end    = document.getElementById('end_time').value;
+            // Safari-fix: lees value via de safariTime helper
+            const start  = getSafariTimeValue('start_time');
+            const end    = getSafariTimeValue('end_time');
             const err    = document.getElementById('step1-error');
             if (!guests || parseInt(guests) < 1 || !date) {
                 err.textContent = 'Vul een datum en aantal gasten in om verder te gaan.';
