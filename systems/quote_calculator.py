@@ -10,7 +10,7 @@ CATERING_PRICES = {
     'Walking Dinner 4-gangen':      39.50,
     'Walking Dinner 5-gangen':      47.00,
     'Barbecue':                     29.50,
-    'Vis Barbecue':                 32.50,
+    'Vlees/vis barbecue':                 32.50,
     'Buffet':                       35.55,
     'Borrelplank':                   6.95,
     'Welkomst bubbels':              6.95,
@@ -47,7 +47,7 @@ ITEM_ORDER = [
     'Walking Dinner 4-gangen',
     'Walking Dinner 5-gangen',
     'Barbecue',
-    'Vis Barbecue',
+    'Vlees/vis barbecue',
     'Fingerfoods',
     'Borrelbites',
     # 3. Acts (op aanvraag)

@@ -1170,10 +1170,10 @@
                         </div>
                         <div class="catering-body">
                             <div class="catering-name-row">
-                                <span class="catering-label">Vis Barbecue</span>
+                                <span class="catering-label">Vlees/vis barbecue</span>
                                 <span class="catering-price">€32,50 p.p.</span>
                             </div>
-                            <div class="catering-desc">Vis & zeevruchten van de grill, saladebuffet, brood</div>
+                            <div class="catering-desc">2 stukken vlees 2 stukken vis van de gril, saladebuffet, brood</div>
                         </div>
                         <div class="catering-add">✓</div>
                     </div>
@@ -1641,8 +1641,8 @@
     function toggleBBQ(card) {
         // Deselecteer Vis BBQ als die geselecteerd is
         const visBbqCard = document.getElementById('visBbqCard');
-        if (selectedCatering.has('Vis Barbecue')) {
-            selectedCatering.delete('Vis Barbecue');
+        if (selectedCatering.has('Vlees/vis barbecue')) {
+            selectedCatering.delete('Vlees/vis barbecue');
             visBbqCard.classList.remove('selected');
         }
         toggleCatering(card, 'Barbecue');
@@ -1655,7 +1655,7 @@
             selectedCatering.delete('Barbecue');
             bbqCard.classList.remove('selected');
         }
-        toggleCatering(card, 'Vis Barbecue');
+        toggleCatering(card, 'Vlees/vis barbecue');
     }
 
     // ── OVERIGE DRANKEN ───────────────────────────────────────────
