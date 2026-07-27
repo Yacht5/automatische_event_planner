@@ -160,7 +160,8 @@ BTW_9_ITEMS = {
     "Sandwich & Soup", "Lunch 2-gangen", "Lunch 3-gangen",
     "Borrelbites", "Borrelplank", "Fingerfoods",
     "Walking Dinner 4-gangen", "Walking Dinner 5-gangen",
-    "Barbecue", "Vlees/vis barbecue", "Buffet", "2 gangen diner", "3 gangen diner", "4 gangen diner"
+    "Barbecue", "Vlees/vis barbecue", "Buffet", "2 gangen diner", "3 gangen diner", "4 gangen diner",
+    "Koffie & thee met vlaai", "Koffie & thee met zoetigheden", "Grand dessert"
 }
 
 # Items die 0% BTW krijgen (zaalhuur)
